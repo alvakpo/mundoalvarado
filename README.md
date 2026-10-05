@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mundo Alvarado — Programa de Beneficios
 
-## Getting Started
+Sistema digital del Programa de Beneficios, Pertenencia y Crecimiento Societario del **Club Atlético Alvarado**.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Framework**: Next.js 16 (App Router)
+- **Lenguaje**: TypeScript
+- **Estilos**: Tailwind CSS + CSS Variables
+- **Auth + DB**: Supabase (PostgreSQL + Auth)
+- **Estado**: Zustand
+- **Deploy**: Vercel
+
+## Arquitectura
+
+```
+src/
+├── app/                    # Rutas Next.js App Router
+│   ├── dashboard/          # Área privada (requiere auth)
+│   │   ├── page.tsx        # Inicio
+│   │   ├── chances/        # Chances mensuales
+│   │   ├── anual/          # Premio anual
+│   │   ├── referidos/      # Mis referidos
+│   │   ├── invitar/        # Invitar amigo
+│   │   └── cuenta/         # Mi cuenta
+│   ├── login/              # Login
+│   ├── register/           # Registro
+│   └── r/[alias]/          # Ruta pública de referido
+├── components/             # Componentes reutilizables
+├── lib/
+│   ├── brio/               # Adaptador Brío (mock + interfaz real)
+│   ├── business/           # Lógica de negocio (chances, referidos)
+│   ├── mock/               # Datos mock para desarrollo
+│   ├── supabase/           # Clientes Supabase (browser + server)
+│   └── auth/               # Autenticación mock
+├── store/                  # Estado global (Zustand)
+├── types/                  # Tipos TypeScript centralizados
+└── __tests__/              # Tests de lógica de negocio
+supabase/
+└── schema.sql              # Esquema PostgreSQL completo con RLS
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Cuenta de prueba (modo demo)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+Email:    marcela@test.com
+Password: test1234
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Configuración
 
-## Learn More
+1. Crear proyecto en Supabase
+2. Ejecutar `supabase/schema.sql` en el SQL Editor
+3. Copiar `.env.example` a `.env.local` y completar las variables
+4. `npm install && npm run dev`
 
-To learn more about Next.js, take a look at the following resources:
+## Variables de entorno
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_APP_URL=https://mundoalvarado.vercel.app
+NEXT_PUBLIC_USE_MOCK_DATA=true
+NEXT_PUBLIC_USE_MOCK_BRIO=true
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tests
 
-## Deploy on Vercel
+```bash
+npm test               # Ejecutar tests
+npm run test:coverage  # Tests con cobertura
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Integración con Brío (futura)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+La integración con Brío está preparada en `src/lib/brio/`.  
+Actualmente usa `MockBrioAdapter`. Cuando esté disponible la API real:
+
+1. Crear `src/lib/brio/realBrioAdapter.ts` implementando `BrioAdapter`
+2. Cambiar `NEXT_PUBLIC_USE_MOCK_BRIO=false` en `.env`
+3. Sin modificar pantallas ni lógica de negocio
+
+## Deploy
+
+El proyecto está configurado para Vercel con Next.js.  
+Configurar las variables de entorno en el dashboard de Vercel.

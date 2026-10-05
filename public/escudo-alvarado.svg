@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 877 1011" fill="none">
+  <!-- Escudo Club Atlético Alvarado - C.A.A. -->
+  <!-- Fondo azul navy institucional -->
+  <path d="M438.5 5 L872 180 L872 550 C872 750 670 940 438.5 1005 C207 940 5 750 5 550 L5 180 Z" fill="#0f2044" stroke="white" stroke-width="10"/>
+  <!-- Banda diagonal blanca -->
+  <path d="M150 50 L820 680 L720 780 L50 150 Z" fill="white"/>
+  <!-- C.A.A. sobre la banda -->
+  <text x="350" y="530" font-family="Arial Black, sans-serif" font-size="120" font-weight="900" fill="#0f2044" text-anchor="middle" transform="rotate(-37, 350, 430)">C.A.A.</text>
+</svg>
