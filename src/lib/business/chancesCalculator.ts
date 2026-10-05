@@ -9,6 +9,7 @@ import {
   MonthlyChancesResult,
   AnnualMonthlyChancesResult,
   AnnualAccumulatedResult,
+  AnnualYearSeries,
   ChanceBreakdownItem,
   BASE_CHANCES,
   MONTHLY_CUTOFF_DAY,
@@ -206,26 +207,108 @@ export function calculateAnnualMonthlyChances(
 
 // ============================================================
 // CHANCES ANUALES ACUMULADAS
-// Suma el historial de chances anuales sin destruir datos anteriores
 // ============================================================
-export function calculateAnnualAccumulatedChances(
-  appUserId: string,
-  history: AnnualMonthlyChancesResult[],
-  year: number
-): AnnualAccumulatedResult {
-  const yearHistory = history.filter(
-    (h) => h.appUserId === appUserId && h.year === year
-  );
+// El sorteo anual se juega UNA SOLA VEZ AL AÑO. Las chances se
+// calculan mes a mes, se congelan en el corte del día 20 y se
+// acumulan. Por lo tanto la invariante que hay que garantizar es:
+// CADA MES CUENTA EXACTAMENTE UNA VEZ.
+//
+// Sumar el historial a ciegas no alcanza: si un mes aparece repetido
+// (dato inconsistente, doble escritura, reintento del proceso de
+// corte) el pozo del sorteo anual queda inflado. Y si además se le
+// suma el mes en curso "por arriba", un mes ya congelado se cuenta
+// dos veces.
+//
+// No recalcula ni destruye historial: sólo selecciona y ordena.
+// ============================================================
 
-  const totalAccumulated = yearHistory.reduce(
-    (sum, h) => sum + h.chancesThisMonth,
-    0
-  );
+const MIN_MONTH = 1;
+const MAX_MONTH = 12;
+
+function isValidMonth(month: number): boolean {
+  return Number.isInteger(month) && month >= MIN_MONTH && month <= MAX_MONTH;
+}
+
+function normalizeChances(value: number): number {
+  if (!Number.isFinite(value) || value <= 0) return 0;
+  return Math.trunc(value);
+}
+
+// Construye la serie anual: a lo sumo un registro por mes.
+export function buildAnnualYearSeries(
+  appUserId: string,
+  year: number,
+  snapshots: AnnualMonthlyChancesResult[],
+  liveMonth?: AnnualMonthlyChancesResult | null
+): AnnualYearSeries {
+  const byMonth = new Map<number, AnnualMonthlyChancesResult>();
+  const duplicateMonths: number[] = [];
+
+  for (const entry of snapshots ?? []) {
+    if (!entry) continue;
+    if (entry.appUserId !== appUserId) continue;
+    if (entry.year !== year) continue;
+    if (!isValidMonth(entry.month)) continue;
+
+    if (byMonth.has(entry.month) && !duplicateMonths.includes(entry.month)) {
+      duplicateMonths.push(entry.month);
+    }
+
+    // Ante un mes repetido gana el último: el historial se asume en
+    // orden cronológico y el registro más nuevo es el vigente.
+    byMonth.set(entry.month, {
+      ...entry,
+      chancesThisMonth: normalizeChances(entry.chancesThisMonth),
+    });
+  }
+
+  // El mes en curso entra SÓLO si ese mes todavía no está congelado.
+  // Si ya existe snapshot del mes, el snapshot manda: se tomó después
+  // del corte y no debe ser pisado por un valor provisorio.
+  let liveMonthIncluded = false;
+  if (
+    liveMonth &&
+    liveMonth.appUserId === appUserId &&
+    liveMonth.year === year &&
+    isValidMonth(liveMonth.month) &&
+    !byMonth.has(liveMonth.month)
+  ) {
+    byMonth.set(liveMonth.month, {
+      ...liveMonth,
+      chancesThisMonth: normalizeChances(liveMonth.chancesThisMonth),
+    });
+    liveMonthIncluded = true;
+  }
+
+  const periods = Array.from(byMonth.values()).sort((a, b) => a.month - b.month);
+  const totalAccumulated = periods.reduce((sum, p) => sum + p.chancesThisMonth, 0);
 
   return {
     appUserId,
     year,
+    periods,
+    monthsCounted: periods.length,
     totalAccumulated,
-    monthlyHistory: yearHistory.sort((a, b) => a.month - b.month),
+    duplicateMonths: duplicateMonths.sort((a, b) => a - b),
+    liveMonthIncluded,
+  };
+}
+
+export function calculateAnnualAccumulatedChances(
+  appUserId: string,
+  history: AnnualMonthlyChancesResult[],
+  year: number,
+  liveMonth?: AnnualMonthlyChancesResult | null
+): AnnualAccumulatedResult {
+  const series = buildAnnualYearSeries(appUserId, year, history, liveMonth);
+
+  return {
+    appUserId,
+    year,
+    totalAccumulated: series.totalAccumulated,
+    monthlyHistory: series.periods,
+    monthsCounted: series.monthsCounted,
+    duplicateMonths: series.duplicateMonths,
+    liveMonthIncluded: series.liveMonthIncluded,
   };
 }

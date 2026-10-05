@@ -116,11 +116,29 @@ export interface AnnualMonthlyChancesResult {
   breakdown: ChanceBreakdownItem[];
 }
 
+// Serie anual: los meses que componen el pozo del sorteo anual.
+// Invariante: como máximo UNA entrada por mes. El sorteo anual se juega
+// una sola vez al año, así que un mes contado dos veces infla el pozo.
+export interface AnnualYearSeries {
+  appUserId: AppUserId;
+  year: number;
+  periods: AnnualMonthlyChancesResult[];
+  monthsCounted: number;
+  totalAccumulated: number;
+  /** Meses que venían repetidos en los snapshots (se contaron una vez). */
+  duplicateMonths: number[];
+  /** true si el mes en curso entró como provisorio (no estaba congelado). */
+  liveMonthIncluded: boolean;
+}
+
 export interface AnnualAccumulatedResult {
   appUserId: AppUserId;
   year: number;
   totalAccumulated: number;
   monthlyHistory: AnnualMonthlyChancesResult[];
+  monthsCounted: number;
+  duplicateMonths: number[];
+  liveMonthIncluded: boolean;
 }
 
 // ---- RED DE REFERIDOS (2 NIVELES) ----

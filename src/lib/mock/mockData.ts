@@ -240,73 +240,117 @@ export const MOCK_REFERRALS: Referral[] = [
 ];
 
 // ---- HISTORIAL DE CHANCES ANUALES MOCK ----
+// Coherente con la red de MOCK_MEMBERS/MOCK_REFERRALS y con la regla
+// del premio anual: se reconstruye la red anterior al corte del día 20
+// de cada mes usando referral.createdAt, y se aplica
+// calculateAnnualMonthlyChances.
+//
+// (Marzo no figura: antes del corte sólo existía Juan como referido
+// directo, y con menos de 2 directos activos no se genera ninguna
+// chance anual. Hay un test que verifica esta coherencia.)
+//
+// Cómo evoluciona:
+//   Abr: Juan + Laura al día ...................... +1 (2 directos)
+//   May: + Carlos (con deuda) ..................... +1 (2 activos)
+//   Jun: + Sofía; Juan ya tiene Pedro y Martín .... +1 +1
+//   Jul: + Lucía; Juan 2, Laura 1 (Pablo con deuda)  +1 +1
 export const MOCK_ANNUAL_HISTORY: AnnualMonthlyChancesResult[] = [
-  {
-    appUserId: 'user-marcela-001',
-    month: 3,
-    year: 2026,
-    chancesThisMonth: 1,
-    breakdown: [{ label: '2+ referidos directos activos', chances: 1, reason: 'Juan y Laura al día' }],
-  },
   {
     appUserId: 'user-marcela-001',
     month: 4,
     year: 2026,
     chancesThisMonth: 1,
-    breakdown: [{ label: '2+ referidos directos activos', chances: 1, reason: 'Juan y Laura al día' }],
+    breakdown: [
+      {
+        label: 'Tus referidos directos',
+        chances: 1,
+        reason: 'Tenés 2 referidos directos al día (Juan y Laura)',
+      },
+    ],
   },
   {
     appUserId: 'user-marcela-001',
     month: 5,
     year: 2026,
-    chancesThisMonth: 2,
+    chancesThisMonth: 1,
     breakdown: [
-      { label: '2+ referidos directos activos', chances: 1, reason: 'Juan, Laura y Sofía al día' },
-      { label: 'Juan tiene 2+ referidos activos', chances: 1, reason: 'Pedro y Martín al día' },
+      {
+        label: 'Tus referidos directos',
+        chances: 1,
+        reason: 'Tenés 2 referidos directos al día (Juan y Laura; Carlos con deuda)',
+      },
     ],
   },
   {
     appUserId: 'user-marcela-001',
     month: 6,
     year: 2026,
-    chancesThisMonth: 3,
+    chancesThisMonth: 2,
     breakdown: [
-      { label: '2+ referidos directos activos', chances: 1, reason: 'Juan, Laura y Sofía al día' },
-      { label: 'Juan tiene 2+ referidos activos', chances: 1, reason: 'Pedro y Martín al día' },
-      { label: 'Laura tiene 2+ referidos activos', chances: 1, reason: 'Ana al día' },
+      {
+        label: 'Tus referidos directos',
+        chances: 1,
+        reason: 'Tenés 3 referidos directos al día (Juan, Laura y Sofía)',
+      },
+      {
+        label: 'Juan Pérez',
+        chances: 1,
+        reason: 'Juan tiene 2 referidos al día (Pedro y Martín)',
+      },
     ],
   },
   {
     appUserId: 'user-marcela-001',
     month: 7,
     year: 2026,
-    chancesThisMonth: 3,
+    chancesThisMonth: 2,
     breakdown: [
-      { label: '2+ referidos directos activos', chances: 1, reason: 'Juan, Laura, Sofía y Lucía al día' },
-      { label: 'Juan tiene 2+ referidos activos', chances: 1, reason: 'Pedro y Martín al día' },
-      { label: 'Laura tiene 2+ referidos activos', chances: 1, reason: 'Ana al día' },
+      {
+        label: 'Tus referidos directos',
+        chances: 1,
+        reason: 'Tenés 4 referidos directos al día (Juan, Laura, Sofía y Lucía)',
+      },
+      {
+        label: 'Juan Pérez',
+        chances: 1,
+        reason: 'Juan tiene 2 referidos al día (Pedro y Martín)',
+      },
     ],
   },
   {
     appUserId: 'user-marcela-001',
     month: 8,
     year: 2026,
-    chancesThisMonth: 3,
+    chancesThisMonth: 2,
     breakdown: [
-      { label: '2+ referidos directos activos', chances: 1, reason: 'Juan, Laura y Sofía al día' },
-      { label: 'Juan tiene 2+ referidos activos', chances: 1, reason: 'Pedro y Martín al día' },
-      { label: 'Laura tiene 2+ referidos activos', chances: 1, reason: 'Ana al día' },
+      {
+        label: 'Tus referidos directos',
+        chances: 1,
+        reason: 'Tenés 4 referidos directos al día (Juan, Laura, Sofía y Lucía)',
+      },
+      {
+        label: 'Juan Pérez',
+        chances: 1,
+        reason: 'Juan tiene 2 referidos al día (Pedro y Martín)',
+      },
     ],
   },
   {
     appUserId: 'user-marcela-001',
     month: 9,
     year: 2026,
-    chancesThisMonth: 3,
+    chancesThisMonth: 2,
     breakdown: [
-      { label: '2+ referidos directos activos', chances: 1, reason: 'Juan, Laura y Sofía al día' },
-      { label: 'Juan tiene 2+ referidos activos', chances: 1, reason: 'Pedro y Martín al día' },
-      { label: 'Laura tiene 2+ referidos activos', chances: 1, reason: 'Ana al día' },
+      {
+        label: 'Tus referidos directos',
+        chances: 1,
+        reason: 'Tenés 4 referidos directos al día (Juan, Laura, Sofía y Lucía)',
+      },
+      {
+        label: 'Juan Pérez',
+        chances: 1,
+        reason: 'Juan tiene 2 referidos al día (Pedro y Martín)',
+      },
     ],
   },
 ];

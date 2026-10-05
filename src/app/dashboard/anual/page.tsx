@@ -9,6 +9,7 @@ import {
 import {
   calculateAnnualMonthlyChances,
   calculateAnnualAccumulatedChances,
+  evaluateMonthlyCutoff,
 } from '@/lib/business/chancesCalculator';
 import { ChanceBreakdown } from '@/components/ChanceBreakdown';
 import { ReferralNode } from '@/components/ReferralNode';
@@ -22,8 +23,13 @@ export default function AnualPage() {
   if (!user) return null;
 
   const now = new Date();
-  const month = now.getMonth() + 1;
-  const year = now.getFullYear();
+
+  // El corte del día 20 a las 23:59 define a qué mes pertenece cada
+  // evaluación: "la información del día 21 en adelante se considera
+  // para el mes siguiente".
+  const cutoff = evaluateMonthlyCutoff(now);
+  const month = cutoff.effectiveMonth;
+  const year = cutoff.effectiveYear;
 
   const directReferrals = getMockDirectReferrals(user.appUserId);
   const secondLevelMap = getMockSecondLevelReferrals(user.appUserId);
@@ -36,11 +42,20 @@ export default function AnualPage() {
     year
   );
 
+  // El pozo del sorteo anual se acumula para el año en curso, con una
+  // sola entrada por mes. El mes en curso entra como provisorio sólo si
+  // todavía no está congelado en el historial, y sólo si pertenece a
+  // este año: en diciembre, después del corte, el mes en curso ya es
+  // enero del año siguiente y no debe entrar en este pozo.
+  const currentYear = now.getFullYear();
   const accumulatedResult = calculateAnnualAccumulatedChances(
     user.appUserId,
     MOCK_ANNUAL_HISTORY,
-    year
+    currentYear,
+    year === currentYear ? thisMonthResult : null
   );
+
+  const liveMonth = accumulatedResult.liveMonthIncluded ? month : null;
 
   return (
     <div style={{ padding: '2rem', maxWidth: 900, margin: '0 auto' }}>
@@ -123,10 +138,13 @@ export default function AnualPage() {
             lineHeight: 1,
             marginBottom: '0.25rem',
           }}>
-            {accumulatedResult.totalAccumulated + thisMonthResult.chancesThisMonth}
+            {accumulatedResult.totalAccumulated}
           </div>
           <div style={{ color: 'rgba(245, 158, 11, 0.7)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             Chances totales
+          </div>
+          <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.5rem' }}>
+            {accumulatedResult.monthsCounted} de 12 meses computados
           </div>
         </div>
       </div>
@@ -155,59 +173,54 @@ export default function AnualPage() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {accumulatedResult.monthlyHistory.map((h) => (
-                <div
-                  key={h.month}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.5rem 0.75rem',
-                    background: 'var(--bg-elevated)',
-                    borderRadius: '8px',
-                  }}
-                >
-                  <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                    {getMonthName(h.month)}
+              {accumulatedResult.monthlyHistory.map((h) => {
+                const isLive = liveMonth === h.month;
+                return (
+                  <div
+                    key={h.month}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.5rem 0.75rem',
+                      background: isLive ? 'rgba(245, 158, 11, 0.1)' : 'var(--bg-elevated)',
+                      borderRadius: '8px',
+                      border: isLive ? '1px solid rgba(245, 158, 11, 0.2)' : '1px solid transparent',
+                    }}
+                  >
+                    <div style={{
+                      fontSize: '0.875rem',
+                      color: isLive ? '#f59e0b' : 'var(--text-secondary)',
+                      fontWeight: isLive ? 600 : 400,
+                    }}>
+                      {getMonthName(h.month)}
+                      {isLive && ' (en curso)'}
+                    </div>
+                    <div style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: '1.125rem',
+                      fontWeight: 700,
+                      color: isLive || h.chancesThisMonth > 0 ? '#f59e0b' : 'var(--text-muted)',
+                    }}>
+                      +{h.chancesThisMonth}
+                    </div>
                   </div>
-                  <div style={{
-                    fontFamily: 'var(--font-display)',
-                    fontSize: '1.125rem',
-                    fontWeight: 700,
-                    color: h.chancesThisMonth > 0 ? '#f59e0b' : 'var(--text-muted)',
-                  }}>
-                    +{h.chancesThisMonth}
-                  </div>
-                </div>
-              ))}
-
-              {/* Mes actual */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '0.5rem 0.75rem',
-                  background: 'rgba(245, 158, 11, 0.1)',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(245, 158, 11, 0.2)',
-                }}
-              >
-                <div style={{ fontSize: '0.875rem', color: '#f59e0b', fontWeight: 600 }}>
-                  {getMonthName(month)} (actual)
-                </div>
-                <div style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '1.125rem',
-                  fontWeight: 700,
-                  color: '#f59e0b',
-                }}>
-                  +{thisMonthResult.chancesThisMonth}
-                </div>
-              </div>
+                );
+              })}
             </div>
 
-            {accumulatedResult.monthlyHistory.length === 0 && thisMonthResult.chancesThisMonth === 0 && (
+            {accumulatedResult.duplicateMonths.length > 0 && (
+              <div style={{
+                marginTop: '0.75rem',
+                fontSize: '0.75rem',
+                color: 'var(--status-pending)',
+                lineHeight: 1.5,
+              }}>
+                ⚠️ Se detectaron meses repetidos en el historial (se contaron una sola vez).
+              </div>
+            )}
+
+            {accumulatedResult.monthlyHistory.length === 0 && (
               <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
                 Aún no acumulaste chances anuales.
               </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -22,18 +22,18 @@ function RegisterForm() {
     confirmPassword: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [referrerInfo, setReferrerInfo] = useState<string | null>(null);
   const referralCode = searchParams.get('ref');
 
-  useEffect(() => {
-    if (referralCode) {
-      const referrer = MOCK_MEMBERS.find(
-        (m) => m.referralCode === referralCode || m.publicAlias === referralCode
-      );
-      if (referrer) {
-        setReferrerInfo(`Referido por: ${referrer.firstName} ${referrer.lastName}`);
-      }
-    }
+  // Derivado, no estado: el banner se resuelve en el mismo render, sin
+  // un setState dentro de un effect (que provocaba un render en cascada).
+  const referrerInfo = useMemo(() => {
+    if (!referralCode) return null;
+    const referrer = MOCK_MEMBERS.find(
+      (m) => m.referralCode === referralCode || m.publicAlias === referralCode
+    );
+    return referrer
+      ? `Referido por: ${referrer.firstName} ${referrer.lastName}`
+      : null;
   }, [referralCode]);
 
   const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {

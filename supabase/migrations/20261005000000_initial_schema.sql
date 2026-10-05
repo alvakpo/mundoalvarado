@@ -3,11 +3,6 @@
 -- Club Atlético Alvarado - Programa de Beneficios
 -- ============================================================
 -- Ejecutar este script en el SQL Editor de Supabase
---
--- Esta versión ya incluye el fix de seguridad RLS. Si tu base fue
--- inicializada con la versión anterior, aplicá en su lugar:
---   supabase/migrations/20261006000000_fix_rls_security.sql
--- ============================================================
 
 -- ---- EXTENSIONES ----
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -53,11 +48,6 @@ CREATE INDEX idx_profiles_brio_member_id ON public.profiles(brio_member_id);
 CREATE INDEX idx_profiles_referral_code ON public.profiles(referral_code);
 CREATE INDEX idx_profiles_public_alias ON public.profiles(public_alias);
 CREATE INDEX idx_profiles_referred_by ON public.profiles(referred_by_app_user_id);
-
--- Unicidad case-insensitive: evita que "Marce" y "marce" resuelvan
--- a links distintos, y que un código se confunda con otro por case.
-CREATE UNIQUE INDEX idx_profiles_public_alias_lower ON public.profiles(lower(public_alias));
-CREATE UNIQUE INDEX idx_profiles_referral_code_upper ON public.profiles(upper(referral_code));
 
 -- ============================================================
 -- TABLA: members
@@ -128,11 +118,6 @@ CREATE INDEX idx_monthly_chances_period ON public.monthly_chances(year, month);
 -- TABLA: annual_monthly_snapshots
 -- Chances generadas para el premio anual, por mes
 -- Guardadas permanentemente - NO recalcular destruyendo datos
---
--- El sorteo anual se juega UNA VEZ AL AÑO (fin de año). Las chances
--- de cada mes se congelan en el corte (día 20 a las 23:59) y se
--- acumulan hasta el sorteo. El UNIQUE de abajo es la garantía de que
--- un mes no pueda contarse dos veces en el acumulado anual.
 -- ============================================================
 CREATE TABLE public.annual_monthly_snapshots (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -168,18 +153,13 @@ CREATE INDEX idx_annual_chances_user ON public.annual_chances(app_user_id);
 -- ============================================================
 -- FUNCIÓN: updated_at automático
 -- ============================================================
--- search_path fijo: una función sin search_path explícito es un
--- vector de escalada si el caller puede anteponer un esquema.
-CREATE OR REPLACE FUNCTION public.update_updated_at_column()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SET search_path = ''
-AS $$
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$;
+$$ LANGUAGE plpgsql;
 
 -- Triggers
 CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
@@ -197,190 +177,96 @@ ALTER TABLE public.monthly_chances ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.annual_monthly_snapshots ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.annual_chances ENABLE ROW LEVEL SECURITY;
 
--- ============================================================
--- FUNCIONES DE APOYO PARA LAS POLÍTICAS
--- Deben declararse ANTES de las políticas que las usan: PostgreSQL
--- resuelve la expresión de la política al crear la política.
--- ============================================================
-
--- ------------------------------------------------------------
--- Resolución pública del link /r/{alias}
--- ------------------------------------------------------------
--- Devuelve SÓLO el código de referido y un nombre a mostrar, que es
--- lo que un link de invitación público legítimamente expone.
---
--- IMPORTANTE: reemplaza a la política `USING (TRUE)` del esquema
--- anterior. RLS es a nivel de FILA, no de columna: `USING (TRUE)`
--- sobre `profiles` dejaba leer TODAS las columnas de TODAS las filas
--- (brio_member_id, member_number, referred_by_app_user_id) a
--- cualquiera, incluso con la anon key.
---
--- Tampoco devuelve app_user_id: es el mismo UUID de auth.users y no
--- debe exponerse. El alta debe resolver código -> app_user_id del
--- lado servidor.
--- ------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.resolve_referral_alias(alias_input TEXT)
-RETURNS TABLE (referral_code TEXT, display_name TEXT)
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = ''
-AS $$
-  SELECT
-    p.referral_code,
-    COALESCE(NULLIF(btrim(m.first_name), ''), 'Un socio')
-      || CASE
-           WHEN COALESCE(m.last_name, '') <> '' THEN ' ' || left(m.last_name, 1) || '.'
-           ELSE ''
-         END
-  FROM public.profiles p
-  LEFT JOIN public.members m ON m.app_user_id = p.app_user_id
-  WHERE lower(p.public_alias) = lower(btrim(alias_input))
-     OR upper(p.referral_code) = upper(btrim(alias_input))
-  LIMIT 1;
-$$;
-
-REVOKE ALL ON FUNCTION public.resolve_referral_alias(TEXT) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.resolve_referral_alias(TEXT) TO anon, authenticated;
-
--- ------------------------------------------------------------
--- IDs visibles para el usuario actual
--- ------------------------------------------------------------
--- Fuente única de verdad: yo + mis referidos directos activos +
--- el 2º nivel activo.
---
--- Es SECURITY DEFINER a propósito: el RLS de `referrals` sólo deja
--- ver filas donde sos referrer o referred, así que una política que
--- hiciera el JOIN del 2º nivel directamente quedaba filtrada por ese
--- RLS y devolvía CERO filas (el 2º nivel nunca era visible).
--- ------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.visible_member_ids()
-RETURNS SETOF UUID
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = ''
-AS $$
-  SELECT auth.uid()
-  WHERE auth.uid() IS NOT NULL
-
-  UNION
-
-  SELECT r.referred_app_user_id
-  FROM public.referrals r
-  WHERE r.referrer_app_user_id = auth.uid()
-    AND r.status = 'active'
-
-  UNION
-
-  SELECT r2.referred_app_user_id
-  FROM public.referrals r1
-  JOIN public.referrals r2 ON r2.referrer_app_user_id = r1.referred_app_user_id
-  WHERE r1.referrer_app_user_id = auth.uid()
-    AND r1.status = 'active'
-    AND r2.status = 'active';
-$$;
-
-REVOKE ALL ON FUNCTION public.visible_member_ids() FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.visible_member_ids() TO authenticated;
-
--- ============================================================
--- POLÍTICAS
--- ============================================================
-
--- ---- profiles ----
-CREATE POLICY "profiles_select_own"
-  ON public.profiles FOR SELECT TO authenticated
+-- ---- POLÍTICAS: profiles ----
+CREATE POLICY "Users can view their own profile"
+  ON public.profiles FOR SELECT
   USING (app_user_id = auth.uid());
 
--- Necesaria para que el registro pueda crear el perfil.
-CREATE POLICY "profiles_insert_own"
-  ON public.profiles FOR INSERT TO authenticated
-  WITH CHECK (app_user_id = auth.uid());
+CREATE POLICY "Users can update their own profile"
+  ON public.profiles FOR UPDATE
+  USING (app_user_id = auth.uid());
 
--- WITH CHECK evita que un UPDATE reasigne la fila a otro usuario.
-CREATE POLICY "profiles_update_own"
-  ON public.profiles FOR UPDATE TO authenticated
-  USING (app_user_id = auth.uid())
-  WITH CHECK (app_user_id = auth.uid());
+-- Usuarios pueden ver el alias público de sus referentes (para el banner de registro)
+CREATE POLICY "Public alias is readable for referral resolution"
+  ON public.profiles FOR SELECT
+  USING (TRUE); -- El alias es público para resolver el link /r/{alias}
+-- Nota: No expone datos sensibles, solo public_alias y referral_code
 
--- ---- members ----
--- Una sola política que sí hace visible el 2º nivel.
-CREATE POLICY "members_visible_in_own_network"
-  ON public.members FOR SELECT TO authenticated
-  USING (app_user_id IN (SELECT public.visible_member_ids()));
+-- ---- POLÍTICAS: members ----
+CREATE POLICY "Users can view their own member data"
+  ON public.members FOR SELECT
+  USING (app_user_id = auth.uid());
 
--- ---- referrals ----
-CREATE POLICY "referrals_select_as_referrer"
-  ON public.referrals FOR SELECT TO authenticated
+-- Ver datos de referidos directos propios
+CREATE POLICY "Users can view their direct referrals member data"
+  ON public.members FOR SELECT
+  USING (
+    app_user_id IN (
+      SELECT referred_app_user_id FROM public.referrals
+      WHERE referrer_app_user_id = auth.uid() AND status = 'active'
+    )
+  );
+
+-- Ver datos de segundo nivel (referidos de mis referidos)
+CREATE POLICY "Users can view second level referrals member data"
+  ON public.members FOR SELECT
+  USING (
+    app_user_id IN (
+      SELECT r2.referred_app_user_id FROM public.referrals r1
+      JOIN public.referrals r2 ON r2.referrer_app_user_id = r1.referred_app_user_id
+      WHERE r1.referrer_app_user_id = auth.uid()
+        AND r1.status = 'active'
+        AND r2.status = 'active'
+    )
+  );
+
+-- ---- POLÍTICAS: referrals ----
+CREATE POLICY "Users can view referrals where they are the referrer"
+  ON public.referrals FOR SELECT
   USING (referrer_app_user_id = auth.uid());
 
-CREATE POLICY "referrals_select_as_referred"
-  ON public.referrals FOR SELECT TO authenticated
+CREATE POLICY "Users can view their own referral record"
+  ON public.referrals FOR SELECT
   USING (referred_app_user_id = auth.uid());
 
--- ---- chances ----
--- Sólo lectura del propio historial. La escritura queda reservada a
--- service_role a propósito: estas tablas las llena el proceso de
--- cálculo/corte, nunca el cliente.
-CREATE POLICY "monthly_chances_select_own"
-  ON public.monthly_chances FOR SELECT TO authenticated
+-- ---- POLÍTICAS: monthly_chances ----
+CREATE POLICY "Users can view their own monthly chances"
+  ON public.monthly_chances FOR SELECT
   USING (app_user_id = auth.uid());
 
-CREATE POLICY "annual_monthly_snapshots_select_own"
-  ON public.annual_monthly_snapshots FOR SELECT TO authenticated
+-- ---- POLÍTICAS: annual_monthly_snapshots ----
+CREATE POLICY "Users can view their own annual snapshots"
+  ON public.annual_monthly_snapshots FOR SELECT
   USING (app_user_id = auth.uid());
 
-CREATE POLICY "annual_chances_select_own"
-  ON public.annual_chances FOR SELECT TO authenticated
+-- ---- POLÍTICAS: annual_chances ----
+CREATE POLICY "Users can view their own annual chances"
+  ON public.annual_chances FOR SELECT
   USING (app_user_id = auth.uid());
 
 -- ============================================================
--- FUNCIÓN: Obtener red de referidos del usuario actual
+-- FUNCIÓN: Obtener red de referidos de un usuario
 -- ============================================================
--- La versión anterior recibía `user_id UUID` por parámetro siendo
--- SECURITY DEFINER: cualquier autenticado podía pedir la red de otro
--- usuario salteando el RLS. Ahora opera siempre sobre auth.uid().
--- ============================================================
-CREATE OR REPLACE FUNCTION public.get_referral_network()
+CREATE OR REPLACE FUNCTION get_referral_network(user_id UUID)
 RETURNS TABLE (
   app_user_id UUID,
   level INTEGER,
   referrer_id UUID
-)
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = ''
-AS $$
-  SELECT r.referred_app_user_id, 1, r.referrer_app_user_id
-  FROM public.referrals r
-  WHERE r.referrer_app_user_id = auth.uid()
-    AND r.status = 'active'
+) AS $$
+BEGIN
+  -- Nivel 1: referidos directos
+  RETURN QUERY
+    SELECT r.referred_app_user_id, 1, r.referrer_app_user_id
+    FROM public.referrals r
+    WHERE r.referrer_app_user_id = user_id AND r.status = 'active';
 
-  UNION ALL
-
-  SELECT r2.referred_app_user_id, 2, r2.referrer_app_user_id
-  FROM public.referrals r1
-  JOIN public.referrals r2 ON r2.referrer_app_user_id = r1.referred_app_user_id
-  WHERE r1.referrer_app_user_id = auth.uid()
-    AND r1.status = 'active'
-    AND r2.status = 'active';
-$$;
-
-REVOKE ALL ON FUNCTION public.get_referral_network() FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.get_referral_network() TO authenticated;
-
--- ============================================================
--- Verificación posterior sugerida
--- ============================================================
--- Con la anon key (sin sesión), esto debe dar 0 filas o error:
---   SELECT * FROM public.profiles;
---
--- Con un usuario autenticado, esto sólo debe devolver su propia red:
---   SELECT * FROM public.get_referral_network();
---   SELECT * FROM public.members;
---
--- Y el resolutor público sólo debe devolver código + nombre:
---   SELECT * FROM public.resolve_referral_alias('marce');
--- ============================================================
+  -- Nivel 2: referidos de mis referidos
+  RETURN QUERY
+    SELECT r2.referred_app_user_id, 2, r2.referrer_app_user_id
+    FROM public.referrals r1
+    JOIN public.referrals r2 ON r2.referrer_app_user_id = r1.referred_app_user_id
+    WHERE r1.referrer_app_user_id = user_id
+      AND r1.status = 'active'
+      AND r2.status = 'active';
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
