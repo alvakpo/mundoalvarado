@@ -1,11 +1,20 @@
 import type { Metadata } from 'next';
 import './globals.css';
 
+// Vercel expone el SHA del commit en tiempo de build. Lo dejamos en una
+// meta etiqueta invisible para poder responder, desde afuera y sin
+// loguearse, la pregunta "¿qué versión está publicada?".
+//   ver:  curl -s https://mundoalvarado.vercel.app/login | grep app-commit
+const COMMIT = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? 'local';
+
 export const metadata: Metadata = {
   title: 'Mundo Alvarado — Programa de Beneficios',
   description:
     'Programa de Beneficios, Pertenencia y Crecimiento Societario del Club Atlético Alvarado.',
   keywords: ['Club Atlético Alvarado', 'Mundo Alvarado', 'socios', 'beneficios', 'Mar del Plata'],
+  other: {
+    'app-commit': COMMIT,
+  },
   openGraph: {
     title: 'Mundo Alvarado — Programa de Beneficios',
     description: 'Programa de Beneficios, Pertenencia y Crecimiento Societario del Club Atlético Alvarado.',
