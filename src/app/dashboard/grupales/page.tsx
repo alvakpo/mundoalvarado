@@ -205,6 +205,45 @@ export default function GrupalesPage() {
         </div>
       </div>
 
+      {/* Mapa de 2 niveles: es el protagonista de la pantalla, así que va
+          arriba y a todo el ancho. El desglose y el historial quedan
+          abajo, disponibles pero sin competir por la atención. */}
+      <div
+        className="card animate-fade-in stagger-2"
+        style={{ marginBottom: '1.5rem', opacity: 0, animationFillMode: 'forwards' }}
+      >
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+          Tu red (2 niveles)
+        </div>
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1.75rem', lineHeight: 1.5 }}>
+          Los referidos marcados <strong style={{ color: 'var(--status-active)' }}>+1</strong> te suman
+          una chance para los premios grupales, porque tienen 2 o más referidos propios al día.
+        </div>
+
+        <ReferralTree
+          owner={user}
+          nodes={treeNodes}
+          emptyMessage={
+            <a href="/dashboard/invitar" style={{ color: 'var(--alvarado-accent)', textDecoration: 'none' }}>
+              Invitá amigos para construir tu red →
+            </a>
+          }
+        />
+
+        <div style={{
+          marginTop: '1.5rem',
+          paddingTop: '1rem',
+          borderTop: '1px solid var(--border-subtle)',
+          fontSize: '0.75rem',
+          color: 'var(--text-muted)',
+          lineHeight: 1.6,
+        }}>
+          🔒 De tu red indirecta sólo se muestra el nombre de pila y el estado. Son socios que
+          no invitaste vos, así que su apellido, su número de socio y su contacto quedan
+          reservados.
+        </div>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
 
         {/* Desglose este mes */}
@@ -282,43 +321,6 @@ export default function GrupalesPage() {
               </div>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Mapa de 2 niveles */}
-      <div
-        className="card animate-fade-in stagger-5"
-        style={{ marginTop: '1.5rem', opacity: 0, animationFillMode: 'forwards' }}
-      >
-        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-          Tu red (2 niveles)
-        </div>
-        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1.75rem', lineHeight: 1.5 }}>
-          Los referidos marcados <strong style={{ color: 'var(--status-active)' }}>+1</strong> te suman
-          una chance al sorteo anual, porque tienen 2 o más referidos propios al día.
-        </div>
-
-        <ReferralTree
-          owner={user}
-          nodes={treeNodes}
-          emptyMessage={
-            <a href="/dashboard/invitar" style={{ color: 'var(--alvarado-accent)', textDecoration: 'none' }}>
-              Invitá amigos para construir tu red →
-            </a>
-          }
-        />
-
-        <div style={{
-          marginTop: '1.5rem',
-          paddingTop: '1rem',
-          borderTop: '1px solid var(--border-subtle)',
-          fontSize: '0.75rem',
-          color: 'var(--text-muted)',
-          lineHeight: 1.6,
-        }}>
-          🔒 De tu red indirecta sólo se muestra el nombre de pila y el estado. Son socios que
-          no invitaste vos, así que su apellido, su número de socio y su contacto quedan
-          reservados.
         </div>
       </div>
 

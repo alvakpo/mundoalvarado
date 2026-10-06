@@ -105,45 +105,55 @@ export default function ChancesPage() {
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+      {/* Mapa de referidos directos: es el protagonista de la pantalla,
+          así que va al centro y a todo el ancho. El desglose numérico
+          queda abajo, disponible pero sin competir por la atención. */}
+      <div
+        className="animate-fade-in stagger-2"
+        style={{ opacity: 0, animationFillMode: 'forwards', marginBottom: '1.5rem' }}
+      >
+        <div style={{
+          background: 'var(--bg-card)',
+          borderRadius: '16px',
+          padding: '1.75rem 1.25rem 2.25rem',
+          border: '1px solid var(--border-subtle)',
+        }}>
+          <div style={{
+            fontSize: '0.75rem',
+            color: 'var(--text-muted)',
+            fontWeight: 600,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            marginBottom: '1.75rem',
+            textAlign: 'center',
+          }}>
+            Tu red directa
+          </div>
 
-        {/* Desglose */}
-        <div className="animate-fade-in stagger-2" style={{ opacity: 0, animationFillMode: 'forwards', minWidth: 0 }}>
-          <ChanceBreakdown
-            breakdown={chancesResult.breakdown}
-            total={chancesResult.totalChances}
-            title="Desglose de chances"
+          {/* Árbol de referidos */}
+          <ReferralTree
+            owner={user}
+            ownerCaption={`${chancesResult.baseChances} por tu categoría`}
+            nodes={treeNodes}
+            emptyMessage={
+              <>
+                Aún no tenés referidos.<br />
+                <a href="/dashboard/invitar" style={{ color: 'var(--alvarado-accent)', textDecoration: 'none' }}>
+                  Invitá a un amigo →
+                </a>
+              </>
+            }
           />
         </div>
+      </div>
 
-        {/* Mapa de referidos directos */}
-        <div className="animate-fade-in stagger-3" style={{ opacity: 0, animationFillMode: 'forwards', minWidth: 0 }}>
-          <div style={{
-            background: 'var(--bg-card)',
-            borderRadius: '16px',
-            padding: '1.25rem',
-            border: '1px solid var(--border-subtle)',
-          }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>
-              Tu red directa
-            </div>
-
-            {/* Árbol de referidos */}
-            <ReferralTree
-              owner={user}
-              ownerCaption={`${chancesResult.baseChances} por tu categoría`}
-              nodes={treeNodes}
-              emptyMessage={
-                <>
-                  Aún no tenés referidos.<br />
-                  <a href="/dashboard/invitar" style={{ color: 'var(--alvarado-accent)', textDecoration: 'none' }}>
-                    Invitá a un amigo →
-                  </a>
-                </>
-              }
-            />
-          </div>
-        </div>
+      {/* Desglose */}
+      <div className="animate-fade-in stagger-3" style={{ opacity: 0, animationFillMode: 'forwards' }}>
+        <ChanceBreakdown
+          breakdown={chancesResult.breakdown}
+          total={chancesResult.totalChances}
+          title="Desglose de chances"
+        />
       </div>
 
       {/* Info adicional */}
