@@ -3,8 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Home, Ticket, Trophy, Users, Link as LinkIcon, User, LogOut } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Home, Ticket, Trophy, Users, Link as LinkIcon, Gift, User, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { MemberAvatar } from './MemberAvatar';
 import { MEMBER_CATEGORY_LABELS } from '@/types';
@@ -15,6 +14,7 @@ const navItems = [
   { href: '/dashboard/anual', label: 'Premio anual', icon: Trophy },
   { href: '/dashboard/referidos', label: 'Mis referidos', icon: Users },
   { href: '/dashboard/invitar', label: 'Invitar un amigo', icon: LinkIcon },
+  { href: '/dashboard/puntos', label: 'Puntos diarios', icon: Gift },
   { href: '/dashboard/cuenta', label: 'Mi cuenta', icon: User },
 ];
 

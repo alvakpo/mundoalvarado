@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/authStore';
 import { MemberStatusBadge } from '@/components/MemberStatusBadge';
 import { MEMBER_CATEGORY_LABELS } from '@/types';
 import { getMockDirectReferrals } from '@/lib/mock/mockData';
-import { Trophy, Users, Link as LinkIcon, ChevronRight, Ticket, Star } from 'lucide-react';
+import { Trophy, Users, Link as LinkIcon, ChevronRight, Ticket, Star, Gift } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
@@ -120,10 +120,50 @@ export default function DashboardPage() {
       {/* Grid de tarjetas */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
 
+        {/* Puntos diarios: va primero porque el objetivo es que el socio
+            entre todos los días. El texto es fijo a propósito: mostrar
+            acá "ya reclamaste" haría que el HTML del servidor y el del
+            navegador no coincidan. */}
+        <Link href="/dashboard/puntos" style={{ textDecoration: 'none' }}>
+          <div
+            className="card card-interactive animate-fade-in stagger-2"
+            style={{
+              opacity: 0,
+              animationFillMode: 'forwards',
+              height: '100%',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <div style={{
+                width: 44,
+                height: 44,
+                borderRadius: '12px',
+                background: 'rgba(245, 158, 11, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <Gift size={22} style={{ color: '#f59e0b' }} />
+              </div>
+              <ChevronRight size={18} style={{ color: 'var(--text-muted)' }} />
+            </div>
+            <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Todos los días
+            </div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.125rem', fontWeight: 700, textTransform: 'uppercase' }}>
+              Puntos diarios
+            </div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', marginTop: '0.5rem' }}>
+              Reclamá tus 100 puntos de hoy
+            </div>
+          </div>
+        </Link>
+
         {/* Chances mensuales */}
         <Link href="/dashboard/chances" style={{ textDecoration: 'none' }}>
           <div
-            className="card card-interactive animate-fade-in stagger-2"
+            className="card card-interactive animate-fade-in stagger-3"
             style={{ opacity: 0, animationFillMode: 'forwards', height: '100%' }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
@@ -152,7 +192,7 @@ export default function DashboardPage() {
         {/* Referidos */}
         <Link href="/dashboard/referidos" style={{ textDecoration: 'none' }}>
           <div
-            className="card card-interactive animate-fade-in stagger-3"
+            className="card card-interactive animate-fade-in stagger-4"
             style={{ opacity: 0, animationFillMode: 'forwards', height: '100%' }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
@@ -186,7 +226,7 @@ export default function DashboardPage() {
         {/* Premio anual */}
         <Link href="/dashboard/anual" style={{ textDecoration: 'none' }}>
           <div
-            className="card card-interactive animate-fade-in stagger-4"
+            className="card card-interactive animate-fade-in stagger-5"
             style={{ opacity: 0, animationFillMode: 'forwards', height: '100%' }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
@@ -215,7 +255,7 @@ export default function DashboardPage() {
         {/* Invitar */}
         <Link href="/dashboard/invitar" style={{ textDecoration: 'none' }}>
           <div
-            className="card card-interactive animate-fade-in stagger-5"
+            className="card card-interactive animate-fade-in stagger-6"
             style={{ opacity: 0, animationFillMode: 'forwards', height: '100%', background: 'var(--gradient-accent)', border: '1px solid var(--border-strong)' }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
