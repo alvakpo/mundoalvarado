@@ -13,10 +13,7 @@ interface ReferralNodeProps {
 /**
  * Nodo de un REFERIDO DIRECTO, con su modal de ficha completa.
  *
- * El segundo nivel NO usa este componente: lo dibuja SecondLevelNode
- * dentro de ReferralTree, que sólo conoce nombre de pila y estado.
- * Antes este mismo nodo servía para los dos niveles y era la vía por la
- * que se filtraban el apellido y el número de socio.
+ * Son personas que el socio invitó él mismo, así que ve todos sus datos.
  */
 export function ReferralNode({ member, animationDelay = 0 }: ReferralNodeProps) {
   const [showModal, setShowModal] = useState(false);

@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/authStore';
 import { MemberStatusBadge } from '@/components/MemberStatusBadge';
 import { MEMBER_CATEGORY_LABELS } from '@/types';
 import { getMockDirectReferrals } from '@/lib/mock/mockData';
-import { Trophy, Users, Link as LinkIcon, ChevronRight, Ticket, Star, Gift, Award } from 'lucide-react';
+import { Trophy, Users, Link as LinkIcon, ChevronRight, Ticket, Star, Gift } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
@@ -255,39 +255,10 @@ export default function DashboardPage() {
           </div>
         </Link>
 
-        {/* Premios Grupales */}
-        <Link href="/dashboard/grupales" style={{ textDecoration: 'none' }}>
-          <div
-            className="card card-interactive animate-fade-in stagger-6"
-            style={{ opacity: 0, animationFillMode: 'forwards', height: '100%' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
-              <div style={{
-                width: 44,
-                height: 44,
-                borderRadius: '12px',
-                background: 'rgba(168, 85, 247, 0.12)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <Award size={22} style={{ color: '#a855f7' }} />
-              </div>
-              <ChevronRight size={18} style={{ color: 'var(--text-muted)' }} />
-            </div>
-            <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Premios Grupales
-            </div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, textTransform: 'uppercase', lineHeight: 1.3 }}>
-              Tu red también<br />genera participaciones
-            </div>
-          </div>
-        </Link>
-
         {/* Invitar */}
         <Link href="/dashboard/invitar" style={{ textDecoration: 'none' }}>
           <div
-            className="card card-interactive animate-fade-in stagger-7"
+            className="card card-interactive animate-fade-in stagger-6"
             style={{ opacity: 0, animationFillMode: 'forwards', height: '100%', background: 'var(--gradient-accent)', border: '1px solid var(--border-strong)' }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>

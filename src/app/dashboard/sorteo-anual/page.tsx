@@ -19,10 +19,8 @@ import { Trophy, TrendingUp, ChevronDown, ChevronRight } from 'lucide-react';
 // ============================================================
 // SORTEO ANUAL
 // ============================================================
-// Acumula las chances del SORTEO GENERAL mes a mes. Es un pozo distinto
-// al de Premios Grupales: acá suman todas las chances que el socio
-// genera (su categoría + sus referidos al día), y allá suma la regla
-// de armar red.
+// Acumula las chances del SORTEO GENERAL mes a mes: todas las chances
+// que el socio genera (su categoría + sus referidos al día).
 //
 // El club confirmó que se sortean LOS DOS: cada mes hay un premio
 // general y además estas chances se acumulan para el de fin de año.
@@ -312,8 +310,7 @@ export default function SorteoAnualPage() {
         <div style={{ marginTop: '0.625rem' }}>
           Se sortea <strong style={{ color: 'var(--text-secondary)' }}>todos los meses</strong> por el
           premio general, y <strong style={{ color: 'var(--text-secondary)' }}>además</strong> estas
-          mismas chances se acumulan para el sorteo de fin de año. Es un pozo distinto al de{' '}
-          <strong style={{ color: 'var(--text-secondary)' }}>Premios Grupales</strong>, que premia armar red.
+          mismas chances se acumulan para el sorteo de fin de año.
         </div>
       </div>
     </div>

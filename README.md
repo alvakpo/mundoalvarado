@@ -19,9 +19,10 @@ src/
 │   ├── dashboard/          # Área privada (requiere auth)
 │   │   ├── page.tsx        # Inicio
 │   │   ├── chances/        # Chances mensuales
-│   │   ├── anual/          # Premio anual
+│   │   ├── sorteo-anual/   # Sorteo anual (acumula las chances del mes)
 │   │   ├── referidos/      # Mis referidos
 │   │   ├── invitar/        # Invitar amigo
+│   │   ├── puntos/         # Puntos diarios
 │   │   └── cuenta/         # Mi cuenta
 │   ├── login/              # Login
 │   ├── register/           # Registro

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Ticket, Trophy, Award, Users, Link as LinkIcon, Gift } from 'lucide-react';
+import { Home, Ticket, Trophy, Users, Link as LinkIcon, Gift } from 'lucide-react';
 import { useDailyPointsStore } from '@/store/dailyPointsStore';
 import { canClaimToday, clubDateKey } from '@/lib/business/dailyPoints';
 import { useIsHydrated } from '@/lib/useIsHydrated';
@@ -13,7 +13,6 @@ const navItems = [
   { href: '/dashboard', label: 'Inicio', icon: Home },
   { href: '/dashboard/chances', label: 'Mensual', icon: Ticket },
   { href: '/dashboard/sorteo-anual', label: 'Sorteo', icon: Trophy },
-  { href: '/dashboard/grupales', label: 'Grupal', icon: Award },
   { href: '/dashboard/referidos', label: 'Referidos', icon: Users },
   { href: '/dashboard/invitar', label: 'Invitar', icon: LinkIcon },
   { href: '/dashboard/puntos', label: 'Puntos', icon: Gift },

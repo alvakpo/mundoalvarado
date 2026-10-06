@@ -7,7 +7,6 @@ import {
   EnrichedMember,
   Referral,
   MonthlyChancesResult,
-  AnnualMonthlyChancesResult,
 } from '@/types';
 import { calculateGeneralChances } from '@/lib/business/chancesCalculator';
 
@@ -243,122 +242,6 @@ export const MOCK_REFERRALS: Referral[] = [
   },
 ];
 
-// ---- HISTORIAL DE CHANCES ANUALES MOCK ----
-// Coherente con la red de MOCK_MEMBERS/MOCK_REFERRALS y con la regla
-// del premio anual: se reconstruye la red anterior al corte del día 20
-// de cada mes usando referral.createdAt, y se aplica
-// calculateAnnualMonthlyChances.
-//
-// (Marzo no figura: antes del corte sólo existía Juan como referido
-// directo, y con menos de 2 directos activos no se genera ninguna
-// chance anual. Hay un test que verifica esta coherencia.)
-//
-// Cómo evoluciona:
-//   Abr: Juan + Laura al día ...................... +1 (2 directos)
-//   May: + Carlos (con deuda) ..................... +1 (2 activos)
-//   Jun: + Sofía; Juan ya tiene Pedro y Martín .... +1 +1
-//   Jul: + Lucía; Juan 2, Laura 1 (Pablo con deuda)  +1 +1
-export const MOCK_ANNUAL_HISTORY: AnnualMonthlyChancesResult[] = [
-  {
-    appUserId: 'user-marcela-001',
-    month: 4,
-    year: 2026,
-    chancesThisMonth: 1,
-    breakdown: [
-      {
-        label: 'Tus referidos directos',
-        chances: 1,
-        reason: 'Tenés 2 referidos directos al día (Juan y Laura)',
-      },
-    ],
-  },
-  {
-    appUserId: 'user-marcela-001',
-    month: 5,
-    year: 2026,
-    chancesThisMonth: 1,
-    breakdown: [
-      {
-        label: 'Tus referidos directos',
-        chances: 1,
-        reason: 'Tenés 2 referidos directos al día (Juan y Laura; Carlos con deuda)',
-      },
-    ],
-  },
-  {
-    appUserId: 'user-marcela-001',
-    month: 6,
-    year: 2026,
-    chancesThisMonth: 2,
-    breakdown: [
-      {
-        label: 'Tus referidos directos',
-        chances: 1,
-        reason: 'Tenés 3 referidos directos al día (Juan, Laura y Sofía)',
-      },
-      {
-        label: 'Juan Pérez',
-        chances: 1,
-        reason: 'Juan tiene 2 referidos al día (Pedro y Martín)',
-      },
-    ],
-  },
-  {
-    appUserId: 'user-marcela-001',
-    month: 7,
-    year: 2026,
-    chancesThisMonth: 2,
-    breakdown: [
-      {
-        label: 'Tus referidos directos',
-        chances: 1,
-        reason: 'Tenés 4 referidos directos al día (Juan, Laura, Sofía y Lucía)',
-      },
-      {
-        label: 'Juan Pérez',
-        chances: 1,
-        reason: 'Juan tiene 2 referidos al día (Pedro y Martín)',
-      },
-    ],
-  },
-  {
-    appUserId: 'user-marcela-001',
-    month: 8,
-    year: 2026,
-    chancesThisMonth: 2,
-    breakdown: [
-      {
-        label: 'Tus referidos directos',
-        chances: 1,
-        reason: 'Tenés 4 referidos directos al día (Juan, Laura, Sofía y Lucía)',
-      },
-      {
-        label: 'Juan Pérez',
-        chances: 1,
-        reason: 'Juan tiene 2 referidos al día (Pedro y Martín)',
-      },
-    ],
-  },
-  {
-    appUserId: 'user-marcela-001',
-    month: 9,
-    year: 2026,
-    chancesThisMonth: 2,
-    breakdown: [
-      {
-        label: 'Tus referidos directos',
-        chances: 1,
-        reason: 'Tenés 4 referidos directos al día (Juan, Laura, Sofía y Lucía)',
-      },
-      {
-        label: 'Juan Pérez',
-        chances: 1,
-        reason: 'Juan tiene 2 referidos al día (Pedro y Martín)',
-      },
-    ],
-  },
-];
-
 // ---- CUENTA DE PRUEBA ----
 export const TEST_ACCOUNT = {
   email: 'marcela@test.com',
@@ -380,26 +263,12 @@ export function getMockDirectReferrals(appUserId: string): EnrichedMember[] {
   return MOCK_MEMBERS.filter((m) => directReferralIds.includes(m.appUserId));
 }
 
-// Helper para obtener referidos de segundo nivel
-export function getMockSecondLevelReferrals(appUserId: string): Map<string, EnrichedMember[]> {
-  const directReferrals = getMockDirectReferrals(appUserId);
-  const map = new Map<string, EnrichedMember[]>();
-
-  for (const ref of directReferrals) {
-    const secondLevel = getMockDirectReferrals(ref.appUserId);
-    map.set(ref.appUserId, secondLevel);
-  }
-
-  return map;
-}
-
 // ============================================================
 // HISTORIAL DE CHANCES DEL SORTEO GENERAL (mes a mes)
 // ============================================================
-// A diferencia del historial del premio por red, este NO se escribe a
-// mano: se calcula con el MISMO motor que usa la pantalla de chances,
-// sobre la red que existía antes del corte del día 20 de cada mes
-// (según referral.createdAt).
+// Este historial NO se escribe a mano: se calcula con el MISMO motor
+// que usa la pantalla de chances, sobre la red que existía antes del
+// corte del día 20 de cada mes (según referral.createdAt).
 //
 // Se hace así a propósito. Un historial escrito a mano se desincroniza
 // del motor en cuanto cambia una regla, y la pantalla termina mostrando

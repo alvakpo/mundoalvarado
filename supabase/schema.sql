@@ -4,11 +4,12 @@
 -- ============================================================
 -- Ejecutar este script en el SQL Editor de Supabase
 --
--- Esta versión ya incluye el fix de seguridad RLS y la separación de
--- acceso entre primer y segundo nivel de la red. Si tu base fue
--- inicializada con una versión anterior, aplicá en su lugar, en orden:
+-- Este archivo es el ESQUEMA BASE. Después hay que aplicar las
+-- migraciones en orden, que agregan lo que vino después:
 --   supabase/migrations/20261006000000_fix_rls_security.sql
 --   supabase/migrations/20261007000000_privacy_second_level.sql
+--   supabase/migrations/20261008000000_daily_points.sql
+--   supabase/migrations/20261009000000_remove_grupales.sql
 -- ============================================================
 
 -- ---- EXTENSIONES ----
@@ -126,46 +127,12 @@ CREATE TABLE public.monthly_chances (
 CREATE INDEX idx_monthly_chances_user ON public.monthly_chances(app_user_id);
 CREATE INDEX idx_monthly_chances_period ON public.monthly_chances(year, month);
 
--- ============================================================
--- TABLA: annual_monthly_snapshots
--- Chances generadas para el premio anual, por mes
--- Guardadas permanentemente - NO recalcular destruyendo datos
---
--- El sorteo anual se juega UNA VEZ AL AÑO (fin de año). Las chances
--- de cada mes se congelan en el corte (día 20 a las 23:59) y se
--- acumulan hasta el sorteo. El UNIQUE de abajo es la garantía de que
--- un mes no pueda contarse dos veces en el acumulado anual.
--- ============================================================
-CREATE TABLE public.annual_monthly_snapshots (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  app_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  month SMALLINT NOT NULL CHECK (month >= 1 AND month <= 12),
-  year SMALLINT NOT NULL CHECK (year >= 2024),
-  chances_this_month SMALLINT NOT NULL DEFAULT 0,
-  breakdown JSONB,
-  snapshot_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),  -- Cuándo se tomó el snapshot
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(app_user_id, month, year)
-);
-
-CREATE INDEX idx_annual_snapshots_user ON public.annual_monthly_snapshots(app_user_id);
-CREATE INDEX idx_annual_snapshots_period ON public.annual_monthly_snapshots(year, month);
-
--- ============================================================
--- TABLA: annual_chances
--- Acumulado anual de chances (calculado a partir de snapshots)
--- ============================================================
-CREATE TABLE public.annual_chances (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  app_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  year SMALLINT NOT NULL CHECK (year >= 2024),
-  total_accumulated SMALLINT NOT NULL DEFAULT 0,
-  last_updated TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE(app_user_id, year)
-);
-
-CREATE INDEX idx_annual_chances_user ON public.annual_chances(app_user_id);
+-- NOTA: acá estaban `annual_monthly_snapshots` y `annual_chances`, el
+-- pozo del premio por armar red (Premios Grupales). El club lo eliminó
+-- por ser demasiado complejo de explicar. Ver la migración:
+--   supabase/migrations/20261009000000_remove_grupales.sql
+-- Las chances del SORTEO GENERAL viven en `monthly_chances`, que se
+-- mantiene: son la base del Sorteo anual.
 
 -- ============================================================
 -- FUNCIÓN: updated_at automático
@@ -196,8 +163,6 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.referrals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.monthly_chances ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.annual_monthly_snapshots ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.annual_chances ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- FUNCIONES DE APOYO PARA LAS POLÍTICAS
@@ -245,58 +210,11 @@ $$;
 REVOKE ALL ON FUNCTION public.resolve_referral_alias(TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.resolve_referral_alias(TEXT) TO anon, authenticated;
 
--- ------------------------------------------------------------
--- Segundo nivel de la red: LO MÍNIMO PÚBLICO
--- ------------------------------------------------------------
--- Un socio ve la ficha COMPLETA de sus referidos directos, pero de los
--- referidos de sus referidos sólo puede saber el nombre de pila y el
--- estado. Esa persona no lo invitó y no lo conoce.
---
--- POR QUÉ ESTO ES UNA FUNCIÓN APARTE Y NO UNA POLÍTICA DE `members`:
--- el RLS es a nivel de FILA, no de columna. Si el segundo nivel se
--- resolviera con una política sobre `members`, el socio recibiría la
--- fila COMPLETA — con apellido, número de socio y celular — y podría
--- leerla con las herramientas del desarrollador aunque la pantalla no
--- la dibujara. Ocultar en la pantalla no es privacidad.
---
--- Devuelve únicamente:
---   parent_app_user_id  -> de qué referido directo cuelga (dato que el
---                          socio ya tiene, porque es su referido)
---   child_first_name    -> nombre de pila
---   child_status        -> al día / con deuda
--- No devuelve apellido, foto, categoría, número de socio, celular,
--- email ni el identificador interno del socio.
---
--- SECURITY DEFINER para poder leer `referrals` sin que su propio RLS
--- (que sólo deja ver filas propias) bloquee el join del 2º nivel.
--- ------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.my_second_level()
-RETURNS TABLE (
-  parent_app_user_id UUID,
-  child_first_name TEXT,
-  child_status public.member_status
-)
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = ''
-AS $$
-  SELECT
-    r1.referred_app_user_id,
-    m.first_name,
-    m.status
-  FROM public.referrals r1
-  JOIN public.referrals r2
-    ON r2.referrer_app_user_id = r1.referred_app_user_id
-  JOIN public.members m
-    ON m.app_user_id = r2.referred_app_user_id
-  WHERE r1.referrer_app_user_id = auth.uid()
-    AND r1.status = 'active'
-    AND r2.status = 'active';
-$$;
-
-REVOKE ALL ON FUNCTION public.my_second_level() FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.my_second_level() TO authenticated;
+-- NOTA: acá estaba `my_second_level()`, que devolvía el nombre de pila y
+-- el estado de la red indirecta para el premio por armar red
+-- (Premios Grupales). El club eliminó ese premio, y el segundo nivel ya
+-- no se muestra en ninguna pantalla. Ver la migración:
+--   supabase/migrations/20261009000000_remove_grupales.sql
 
 -- ============================================================
 -- POLÍTICAS
@@ -319,9 +237,9 @@ CREATE POLICY "profiles_update_own"
   WITH CHECK (app_user_id = auth.uid());
 
 -- ---- members ----
--- Sólo uno mismo y los referidos DIRECTOS. El segundo nivel NO entra
--- acá: se pide por my_second_level(), que devuelve nada más que el
--- nombre de pila y el estado.
+-- Sólo uno mismo y los referidos DIRECTOS: son personas que el socio
+-- invitó él mismo. El segundo nivel no entra acá, y tampoco se muestra
+-- en ninguna pantalla del programa.
 CREATE POLICY "members_visible_self_and_direct"
   ON public.members FOR SELECT TO authenticated
   USING (
@@ -351,50 +269,6 @@ CREATE POLICY "monthly_chances_select_own"
   ON public.monthly_chances FOR SELECT TO authenticated
   USING (app_user_id = auth.uid());
 
-CREATE POLICY "annual_monthly_snapshots_select_own"
-  ON public.annual_monthly_snapshots FOR SELECT TO authenticated
-  USING (app_user_id = auth.uid());
-
-CREATE POLICY "annual_chances_select_own"
-  ON public.annual_chances FOR SELECT TO authenticated
-  USING (app_user_id = auth.uid());
-
--- ============================================================
--- FUNCIÓN: Obtener red de referidos del usuario actual
--- ============================================================
--- La versión anterior recibía `user_id UUID` por parámetro siendo
--- SECURITY DEFINER: cualquier autenticado podía pedir la red de otro
--- usuario salteando el RLS. Ahora opera siempre sobre auth.uid().
--- ============================================================
-CREATE OR REPLACE FUNCTION public.get_referral_network()
-RETURNS TABLE (
-  app_user_id UUID,
-  level INTEGER,
-  referrer_id UUID
-)
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = ''
-AS $$
-  SELECT r.referred_app_user_id, 1, r.referrer_app_user_id
-  FROM public.referrals r
-  WHERE r.referrer_app_user_id = auth.uid()
-    AND r.status = 'active'
-
-  UNION ALL
-
-  SELECT r2.referred_app_user_id, 2, r2.referrer_app_user_id
-  FROM public.referrals r1
-  JOIN public.referrals r2 ON r2.referrer_app_user_id = r1.referred_app_user_id
-  WHERE r1.referrer_app_user_id = auth.uid()
-    AND r1.status = 'active'
-    AND r2.status = 'active';
-$$;
-
-REVOKE ALL ON FUNCTION public.get_referral_network() FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.get_referral_network() TO authenticated;
-
 -- ============================================================
 -- Verificación posterior sugerida
 -- ============================================================
@@ -402,13 +276,11 @@ GRANT EXECUTE ON FUNCTION public.get_referral_network() TO authenticated;
 --   SELECT * FROM public.profiles;
 --
 -- Con un usuario autenticado:
---   SELECT * FROM public.get_referral_network();   -- ids de la red
---   SELECT * FROM public.members;                  -- SÓLO yo + directos
---   SELECT * FROM public.my_second_level();        -- 2º nivel: nombre y estado
+--   SELECT * FROM public.members;          -- SÓLO yo + mis referidos directos
+--   SELECT * FROM public.monthly_chances;  -- mis chances del sorteo general
 --
--- Si `SELECT * FROM public.members` devuelve a alguien del segundo
--- nivel, el RLS quedó mal aplicado: ahí estarían viajando apellido,
--- número de socio y celular de gente que no es tu referido.
+-- Si `SELECT * FROM public.members` devolviera gente que no es tu
+-- referido directo, el RLS quedaría mal aplicado.
 --
 -- Y el resolutor público sólo debe devolver código + nombre:
 --   SELECT * FROM public.resolve_referral_alias('marce');

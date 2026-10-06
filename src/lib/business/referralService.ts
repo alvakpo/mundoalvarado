@@ -3,33 +3,7 @@
 // LÓGICA DE NEGOCIO: SERVICIO DE REFERIDOS
 // ============================================================
 
-import { EnrichedMember, ReferralNetwork, ReferralNetworkNode } from '@/types';
-import {
-  MOCK_MEMBERS,
-  getMockDirectReferrals,
-  getMockSecondLevelReferrals,
-  getMockMemberById,
-} from '@/lib/mock/mockData';
-
-// Obtener la red completa de referidos (2 niveles)
-export function buildReferralNetwork(appUserId: string): ReferralNetwork | null {
-  const owner = getMockMemberById(appUserId);
-  if (!owner) return null;
-
-  const directReferrals = getMockDirectReferrals(appUserId);
-  const secondLevelMap = getMockSecondLevelReferrals(appUserId);
-
-  const level1: ReferralNetworkNode[] = directReferrals.map((ref) => ({
-    member: ref,
-    level: 1,
-    directReferrals: secondLevelMap.get(ref.appUserId) ?? [],
-  }));
-
-  return {
-    owner,
-    level1,
-  };
-}
+import { getMockDirectReferrals } from '@/lib/mock/mockData';
 
 // Generar código de referido único basado en nombre + número
 export function generateReferralCode(firstName: string, memberNumber: string): string {

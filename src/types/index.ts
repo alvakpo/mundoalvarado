@@ -108,52 +108,6 @@ export interface MonthlyChancesResult {
   breakdown: ChanceBreakdownItem[];
 }
 
-// ---- CHANCES ANUALES (ACUMULADAS) ----
-export interface AnnualMonthlyChancesResult {
-  appUserId: AppUserId;
-  month: number;
-  year: number;
-  chancesThisMonth: number;
-  breakdown: ChanceBreakdownItem[];
-}
-
-// Serie anual: los meses que componen el pozo del sorteo anual.
-// Invariante: como máximo UNA entrada por mes. El sorteo anual se juega
-// una sola vez al año, así que un mes contado dos veces infla el pozo.
-export interface AnnualYearSeries {
-  appUserId: AppUserId;
-  year: number;
-  periods: AnnualMonthlyChancesResult[];
-  monthsCounted: number;
-  totalAccumulated: number;
-  /** Meses que venían repetidos en los snapshots (se contaron una vez). */
-  duplicateMonths: number[];
-  /** true si el mes en curso entró como provisorio (no estaba congelado). */
-  liveMonthIncluded: boolean;
-}
-
-export interface AnnualAccumulatedResult {
-  appUserId: AppUserId;
-  year: number;
-  totalAccumulated: number;
-  monthlyHistory: AnnualMonthlyChancesResult[];
-  monthsCounted: number;
-  duplicateMonths: number[];
-  liveMonthIncluded: boolean;
-}
-
-// ---- RED DE REFERIDOS (2 NIVELES) ----
-export interface ReferralNetworkNode {
-  member: EnrichedMember;
-  level: 1 | 2;
-  directReferrals?: EnrichedMember[]; // solo para nivel 1
-}
-
-export interface ReferralNetwork {
-  owner: EnrichedMember;
-  level1: ReferralNetworkNode[];
-}
-
 // ---- CONTEXTO DE AUTH ----
 export interface AuthUser {
   id: AppUserId;

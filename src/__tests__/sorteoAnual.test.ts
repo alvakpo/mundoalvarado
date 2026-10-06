@@ -2,9 +2,8 @@
 // ============================================================
 // SORTEO ANUAL (acumulación de las chances del sorteo general)
 // ============================================================
-// Es un pozo distinto al de Premios Grupales. Acá se acumulan las
-// chances que el socio genera mes a mes (categoría + referidos), y la
-// invariante es la misma: CADA MES CUENTA UNA SOLA VEZ.
+// Acumula las chances que el socio genera mes a mes (categoría +
+// referidos), y la invariante es: CADA MES CUENTA UNA SOLA VEZ.
 // ============================================================
 
 import {
