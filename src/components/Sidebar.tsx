@@ -29,7 +29,8 @@ export function Sidebar() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
           <div style={{ width: 44, height: 44, position: 'relative', flexShrink: 0 }}>
             <Image
-              src="/escudo-alvarado.svg"
+              src="/escudo-alvarado.webp"
+              sizes="44px"
               alt="Club Atlético Alvarado"
               fill
               style={{ objectFit: 'contain' }}

@@ -22,7 +22,7 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="animate-fade-in" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
         <div style={{ width: 52, height: 52, position: 'relative', flexShrink: 0 }}>
-          <Image src="/escudo-alvarado.svg" alt="Alvarado" fill style={{ objectFit: 'contain' }} />
+          <Image src="/escudo-alvarado.webp" alt="Alvarado" fill sizes="52px" style={{ objectFit: 'contain' }} />
         </div>
         <div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>

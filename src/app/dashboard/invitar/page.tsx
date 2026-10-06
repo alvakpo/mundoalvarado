@@ -36,7 +36,7 @@ export default function InvitarPage() {
       {/* Header */}
       <div className="animate-fade-in" style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
         <div style={{ width: 72, height: 72, position: 'relative', margin: '0 auto 1.25rem' }}>
-          <Image src="/escudo-alvarado.svg" alt="Alvarado" fill style={{ objectFit: 'contain' }} />
+          <Image src="/escudo-alvarado.webp" alt="Alvarado" fill sizes="72px" style={{ objectFit: 'contain' }} />
         </div>
         <h1 className="page-title" style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>INVITÁ A UN AMIGO</h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9375rem', lineHeight: 1.6 }}>

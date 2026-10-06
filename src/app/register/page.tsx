@@ -74,7 +74,7 @@ function RegisterForm() {
         {/* Logo */}
         <div className="animate-fade-in" style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{ width: 56, height: 56, position: 'relative', margin: '0 auto 1rem' }}>
-            <Image src="/escudo-alvarado.svg" alt="Alvarado" fill style={{ objectFit: 'contain' }} />
+            <Image src="/escudo-alvarado.webp" alt="Alvarado" fill sizes="56px" style={{ objectFit: 'contain' }} />
           </div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
             MUNDO ALVARADO

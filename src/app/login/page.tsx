@@ -55,7 +55,7 @@ export default function LoginPage() {
 
         <div style={{ textAlign: 'center', position: 'relative' }}>
           <div style={{ width: 120, height: 120, position: 'relative', margin: '0 auto 2rem' }}>
-            <Image src="/escudo-alvarado.svg" alt="Club Atlético Alvarado" fill style={{ objectFit: 'contain' }} />
+            <Image src="/escudo-alvarado.webp" alt="Club Atlético Alvarado" fill sizes="120px" style={{ objectFit: 'contain' }} />
           </div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'white', lineHeight: 1.1, marginBottom: '1rem' }}>
             MUNDO<br />ALVARADO
@@ -89,7 +89,7 @@ export default function LoginPage() {
         {/* Logo mobile */}
         <div className="animate-fade-in" style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
           <div style={{ width: 64, height: 64, position: 'relative', margin: '0 auto 1.25rem' }}>
-            <Image src="/escudo-alvarado.svg" alt="Alvarado" fill style={{ objectFit: 'contain' }} />
+            <Image src="/escudo-alvarado.webp" alt="Alvarado" fill sizes="64px" style={{ objectFit: 'contain' }} />
           </div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
             MUNDO ALVARADO
