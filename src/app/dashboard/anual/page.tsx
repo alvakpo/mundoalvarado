@@ -12,8 +12,7 @@ import {
   evaluateMonthlyCutoff,
 } from '@/lib/business/chancesCalculator';
 import { ChanceBreakdown } from '@/components/ChanceBreakdown';
-import { ReferralNode } from '@/components/ReferralNode';
-import { MemberAvatar } from '@/components/MemberAvatar';
+import { ReferralTree, ReferralTreeNode } from '@/components/ReferralTree';
 import { getMonthName } from '@/lib/utils';
 import { Trophy, TrendingUp } from 'lucide-react';
 
@@ -57,6 +56,34 @@ export default function AnualPage() {
 
   const liveMonth = accumulatedResult.liveMonthIncluded ? month : null;
 
+  // Para cada referido directo: se cuelga su red propia (2º nivel) y se
+  // marca si genera el +1 del sorteo anual, que es lo que la pantalla no
+  // dejaba ver: con la fila plana, Juan y Laura se veían iguales aunque
+  // sólo Juan aporta una chance.
+  const treeNodes: ReferralTreeNode[] = directReferrals.map((ref) => {
+    const secondLevel = secondLevelMap.get(ref.appUserId) ?? [];
+    const activeSecondLevel = secondLevel.filter((r) => r.status === 'al_dia').length;
+
+    let badge: ReferralTreeNode['badge'];
+    if (ref.status !== 'al_dia') {
+      // El referido mismo no está al día: no aporta.
+      badge = { label: 'no suma', variant: 'muted' };
+    } else if (secondLevel.length === 0) {
+      badge = { label: 'sin red', variant: 'muted' };
+    } else if (activeSecondLevel >= 2) {
+      badge = { label: '+1', variant: 'positive' };
+    } else {
+      // Tiene red, pero no llega a 2 activos.
+      badge = { label: 'no suma', variant: 'muted' };
+    }
+
+    return {
+      member: ref,
+      badge,
+      children: secondLevel.map((child) => ({ member: child })),
+    };
+  });
+
   return (
     <div style={{ padding: '2rem', maxWidth: 900, margin: '0 auto' }}>
 
@@ -82,7 +109,7 @@ export default function AnualPage() {
       </div>
 
       {/* Tarjetas de resumen */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
 
         {/* Este mes */}
         <div
@@ -149,7 +176,7 @@ export default function AnualPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
 
         {/* Desglose este mes */}
         <div className="animate-fade-in stagger-3" style={{ opacity: 0, animationFillMode: 'forwards' }}>
@@ -234,55 +261,23 @@ export default function AnualPage() {
         className="card animate-fade-in stagger-5"
         style={{ marginTop: '1.5rem', opacity: 0, animationFillMode: 'forwards' }}
       >
-        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
           Tu red (2 niveles)
         </div>
-
-        {/* Nivel raíz - Tú */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.375rem', marginBottom: '1rem' }}>
-            <MemberAvatar member={user} size="lg" showStatus />
-            <div style={{ fontWeight: 700, fontSize: '0.9375rem' }}>Vos</div>
-          </div>
-
-          {/* Nivel 1 */}
-          {directReferrals.length > 0 && (
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', borderTop: '2px solid var(--border-medium)', paddingTop: '1rem', width: '100%' }}>
-              {directReferrals.map((ref, i) => {
-                const secondLevel = secondLevelMap.get(ref.appUserId) ?? [];
-                return (
-                  <div key={ref.appUserId} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
-                    <ReferralNode member={ref} level={1} animationDelay={i * 100} />
-
-                    {/* Nivel 2 */}
-                    {secondLevel.length > 0 && (
-                      <div style={{
-                        display: 'flex',
-                        gap: '0.5rem',
-                        flexWrap: 'wrap',
-                        justifyContent: 'center',
-                        borderTop: '1px solid var(--border-subtle)',
-                        paddingTop: '0.75rem',
-                      }}>
-                        {secondLevel.map((ref2, j) => (
-                          <ReferralNode key={ref2.appUserId} member={ref2} level={2} animationDelay={(i * secondLevel.length + j) * 80 + 200} />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {directReferrals.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-              <a href="/dashboard/invitar" style={{ color: 'var(--alvarado-accent)', textDecoration: 'none' }}>
-                Invitá amigos para construir tu red →
-              </a>
-            </div>
-          )}
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1.75rem', lineHeight: 1.5 }}>
+          Los referidos marcados <strong style={{ color: 'var(--status-active)' }}>+1</strong> te suman
+          una chance al sorteo anual, porque tienen 2 o más referidos propios al día.
         </div>
+
+        <ReferralTree
+          owner={user}
+          nodes={treeNodes}
+          emptyMessage={
+            <a href="/dashboard/invitar" style={{ color: 'var(--alvarado-accent)', textDecoration: 'none' }}>
+              Invitá amigos para construir tu red →
+            </a>
+          }
+        />
       </div>
 
       {/* Explicación */}

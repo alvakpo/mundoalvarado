@@ -56,7 +56,7 @@ export function ReferralNode({ member, level = 1, animationDelay = 0 }: Referral
             fontSize: level === 1 ? '0.8125rem' : '0.75rem',
             fontWeight: 600,
             color: 'var(--text-primary)',
-            maxWidth: 80,
+            maxWidth: level === 1 ? 80 : 58,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -67,8 +67,11 @@ export function ReferralNode({ member, level = 1, animationDelay = 0 }: Referral
             fontSize: '0.6875rem',
             color: isActive ? 'var(--status-active)' : 'var(--status-inactive)',
             marginTop: '2px',
+            whiteSpace: 'nowrap',
           }}>
-            {isActive ? '● Al día' : '○ Con deuda'}
+            {/* Sin el glifo: el avatar ya trae el punto de estado, y así
+                cada nodo es ~12px más angosto y entran 5 hermanos por fila */}
+            {isActive ? 'Al día' : 'Con deuda'}
           </div>
         </div>
       </button>
