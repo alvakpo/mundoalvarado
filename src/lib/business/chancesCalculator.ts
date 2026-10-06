@@ -13,6 +13,7 @@ import {
   AnnualYearSeries,
   ChanceBreakdownItem,
   BASE_CHANCES,
+  MEMBER_CATEGORY_LABELS,
   MONTHLY_CUTOFF_DAY,
   MONTHLY_CUTOFF_HOUR,
   MONTHLY_CUTOFF_MINUTE,
@@ -105,7 +106,9 @@ export function calculateGeneralChances(
   // Chances base por categoría
   const baseChances = BASE_CHANCES[member.category];
   breakdown.push({
-    label: `Categoría: ${member.category}`,
+    // El nombre lindo, no la clave interna: al socio no le dice nada
+    // leer "cancha_protector".
+    label: MEMBER_CATEGORY_LABELS[member.category],
     chances: baseChances,
     reason: `${baseChances} chance${baseChances > 1 ? 's' : ''} por tu categoría`,
   });
@@ -245,33 +248,53 @@ function normalizeChances(value: number): number {
   return Math.trunc(value);
 }
 
-// Construye la serie anual: a lo sumo un registro por mes.
+/**
+ * Deja un solo registro por mes. Ante un mes repetido gana el último:
+ * el historial se asume en orden cronológico y el más nuevo es el
+ * vigente.
+ *
+ * Está compartido a propósito entre el pozo por red (Premios Grupales)
+ * y el pozo del sorteo general: los dos se juegan una vez al año, así
+ * que los dos tienen la misma invariante y no conviene que cada uno
+ * tenga su propia versión que después se desincronice.
+ */
+function dedupeMonthsBy<T extends { month: number }>(
+  entries: T[]
+): { kept: Map<number, T>; duplicateMonths: number[] } {
+  const kept = new Map<number, T>();
+  const duplicateMonths: number[] = [];
+
+  for (const entry of entries) {
+    if (kept.has(entry.month) && !duplicateMonths.includes(entry.month)) {
+      duplicateMonths.push(entry.month);
+    }
+    kept.set(entry.month, entry);
+  }
+
+  return { kept, duplicateMonths: duplicateMonths.sort((a, b) => a - b) };
+}
+
+// Construye la serie anual del pozo por red: a lo sumo un registro por mes.
 export function buildAnnualYearSeries(
   appUserId: string,
   year: number,
   snapshots: AnnualMonthlyChancesResult[],
   liveMonth?: AnnualMonthlyChancesResult | null
 ): AnnualYearSeries {
-  const byMonth = new Map<number, AnnualMonthlyChancesResult>();
-  const duplicateMonths: number[] = [];
-
-  for (const entry of snapshots ?? []) {
-    if (!entry) continue;
-    if (entry.appUserId !== appUserId) continue;
-    if (entry.year !== year) continue;
-    if (!isValidMonth(entry.month)) continue;
-
-    if (byMonth.has(entry.month) && !duplicateMonths.includes(entry.month)) {
-      duplicateMonths.push(entry.month);
-    }
-
-    // Ante un mes repetido gana el último: el historial se asume en
-    // orden cronológico y el registro más nuevo es el vigente.
-    byMonth.set(entry.month, {
+  const validos = (snapshots ?? [])
+    .filter(
+      (entry) =>
+        entry &&
+        entry.appUserId === appUserId &&
+        entry.year === year &&
+        isValidMonth(entry.month)
+    )
+    .map((entry) => ({
       ...entry,
       chancesThisMonth: normalizeChances(entry.chancesThisMonth),
-    });
-  }
+    }));
+
+  const { kept: byMonth, duplicateMonths } = dedupeMonthsBy(validos);
 
   // El mes en curso entra SÓLO si ese mes todavía no está congelado.
   // Si ya existe snapshot del mes, el snapshot manda: se tomó después
@@ -321,5 +344,85 @@ export function calculateAnnualAccumulatedChances(
     monthsCounted: series.monthsCounted,
     duplicateMonths: series.duplicateMonths,
     liveMonthIncluded: series.liveMonthIncluded,
+  };
+}
+
+// ============================================================
+// SORTEO ANUAL: ACUMULACIÓN DE LAS CHANCES DEL SORTEO GENERAL
+// ============================================================
+// OJO: esto NO es el premio por red (Premios Grupales). Son dos cosas
+// distintas que se acumulan por separado:
+//
+//   - Sorteo anual   -> suma las chances que el socio genera para el
+//                       SORTEO GENERAL mes a mes (categoría + referidos).
+//                       Es el mismo pozo que se ve en Chances mensuales,
+//                       pero acumulado en vez de renovarse cada mes.
+//   - Premios Grupales -> el premio por armar red (regla de 2+ referidos
+//                       directos al día). Se acumula con su propia regla.
+//
+// Se juega una sola vez al año, así que la invariante vuelve a ser la
+// misma: CADA MES CUENTA EXACTAMENTE UNA VEZ. Se reutiliza la misma
+// deduplicación que el pozo por red.
+// ============================================================
+
+export interface AnnualGeneralAccumulatedResult {
+  appUserId: string;
+  year: number;
+  totalAccumulated: number;
+  monthlyHistory: MonthlyChancesResult[];
+  monthsCounted: number;
+  duplicateMonths: number[];
+  liveMonthIncluded: boolean;
+}
+
+export function calculateAnnualGeneralChances(
+  appUserId: string,
+  history: MonthlyChancesResult[],
+  year: number,
+  liveMonth?: MonthlyChancesResult | null
+): AnnualGeneralAccumulatedResult {
+  const validos = (history ?? [])
+    .filter(
+      (entry) =>
+        entry &&
+        entry.appUserId === appUserId &&
+        entry.year === year &&
+        isValidMonth(entry.month)
+    )
+    .map((entry) => ({
+      ...entry,
+      totalChances: normalizeChances(entry.totalChances),
+    }));
+
+  const { kept: byMonth, duplicateMonths } = dedupeMonthsBy(validos);
+
+  // El mes en curso entra como provisorio sólo si ese mes todavía no
+  // está cerrado. Si ya hay registro del mes, ese manda.
+  let liveMonthIncluded = false;
+  if (
+    liveMonth &&
+    liveMonth.appUserId === appUserId &&
+    liveMonth.year === year &&
+    isValidMonth(liveMonth.month) &&
+    !byMonth.has(liveMonth.month)
+  ) {
+    byMonth.set(liveMonth.month, {
+      ...liveMonth,
+      totalChances: normalizeChances(liveMonth.totalChances),
+    });
+    liveMonthIncluded = true;
+  }
+
+  const periods = Array.from(byMonth.values()).sort((a, b) => a.month - b.month);
+  const totalAccumulated = periods.reduce((sum, p) => sum + p.totalChances, 0);
+
+  return {
+    appUserId,
+    year,
+    totalAccumulated,
+    monthlyHistory: periods,
+    monthsCounted: periods.length,
+    duplicateMonths,
+    liveMonthIncluded,
   };
 }

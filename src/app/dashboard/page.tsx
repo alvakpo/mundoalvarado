@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/authStore';
 import { MemberStatusBadge } from '@/components/MemberStatusBadge';
 import { MEMBER_CATEGORY_LABELS } from '@/types';
 import { getMockDirectReferrals } from '@/lib/mock/mockData';
-import { Trophy, Users, Link as LinkIcon, ChevronRight, Ticket, Star, Gift } from 'lucide-react';
+import { Trophy, Users, Link as LinkIcon, ChevronRight, Ticket, Star, Gift, Award } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
@@ -189,10 +189,42 @@ export default function DashboardPage() {
           </div>
         </Link>
 
+        {/* Sorteo anual */}
+        <Link href="/dashboard/sorteo-anual" style={{ textDecoration: 'none' }}>
+          <div
+            className="card card-interactive animate-fade-in stagger-4"
+            style={{ opacity: 0, animationFillMode: 'forwards', height: '100%' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <div style={{
+                width: 44,
+                height: 44,
+                borderRadius: '12px',
+                background: 'rgba(59, 111, 212, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <Trophy size={22} style={{ color: 'var(--alvarado-accent)' }} />
+              </div>
+              <ChevronRight size={18} style={{ color: 'var(--text-muted)' }} />
+            </div>
+            <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Fin de año
+            </div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.125rem', fontWeight: 700, textTransform: 'uppercase' }}>
+              Sorteo anual
+            </div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', marginTop: '0.5rem' }}>
+              Tus chances se acumulan mes a mes
+            </div>
+          </div>
+        </Link>
+
         {/* Referidos */}
         <Link href="/dashboard/referidos" style={{ textDecoration: 'none' }}>
           <div
-            className="card card-interactive animate-fade-in stagger-4"
+            className="card card-interactive animate-fade-in stagger-5"
             style={{ opacity: 0, animationFillMode: 'forwards', height: '100%' }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
@@ -223,10 +255,10 @@ export default function DashboardPage() {
           </div>
         </Link>
 
-        {/* Premio anual */}
-        <Link href="/dashboard/anual" style={{ textDecoration: 'none' }}>
+        {/* Premios Grupales */}
+        <Link href="/dashboard/grupales" style={{ textDecoration: 'none' }}>
           <div
-            className="card card-interactive animate-fade-in stagger-5"
+            className="card card-interactive animate-fade-in stagger-6"
             style={{ opacity: 0, animationFillMode: 'forwards', height: '100%' }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
@@ -234,17 +266,17 @@ export default function DashboardPage() {
                 width: 44,
                 height: 44,
                 borderRadius: '12px',
-                background: 'rgba(245, 158, 11, 0.12)',
+                background: 'rgba(168, 85, 247, 0.12)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-                <Trophy size={22} style={{ color: '#f59e0b' }} />
+                <Award size={22} style={{ color: '#a855f7' }} />
               </div>
               <ChevronRight size={18} style={{ color: 'var(--text-muted)' }} />
             </div>
             <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Premio anual
+              Premios Grupales
             </div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', fontWeight: 700, textTransform: 'uppercase', lineHeight: 1.3 }}>
               Tu red también<br />genera participaciones
@@ -255,7 +287,7 @@ export default function DashboardPage() {
         {/* Invitar */}
         <Link href="/dashboard/invitar" style={{ textDecoration: 'none' }}>
           <div
-            className="card card-interactive animate-fade-in stagger-6"
+            className="card card-interactive animate-fade-in stagger-7"
             style={{ opacity: 0, animationFillMode: 'forwards', height: '100%', background: 'var(--gradient-accent)', border: '1px solid var(--border-strong)' }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>

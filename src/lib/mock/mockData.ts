@@ -9,6 +9,10 @@ import {
   MonthlyChancesResult,
   AnnualMonthlyChancesResult,
 } from '@/types';
+import { calculateGeneralChances } from '@/lib/business/chancesCalculator';
+
+/** Mes en que arrancó el programa (el club empezó a repartir chances). */
+export const PROGRAM_START_MONTH = 4;
 
 // ---- USUARIOS MOCK ----
 export const MOCK_MEMBERS: EnrichedMember[] = [
@@ -387,4 +391,58 @@ export function getMockSecondLevelReferrals(appUserId: string): Map<string, Enri
   }
 
   return map;
+}
+
+// ============================================================
+// HISTORIAL DE CHANCES DEL SORTEO GENERAL (mes a mes)
+// ============================================================
+// A diferencia del historial del premio por red, este NO se escribe a
+// mano: se calcula con el MISMO motor que usa la pantalla de chances,
+// sobre la red que existía antes del corte del día 20 de cada mes
+// (según referral.createdAt).
+//
+// Se hace así a propósito. Un historial escrito a mano se desincroniza
+// del motor en cuanto cambia una regla, y la pantalla termina mostrando
+// números que la propia lógica no respalda. Calculándolo, es imposible.
+// ============================================================
+
+/** La red de referidos directos tal como estaba antes del corte del mes. */
+function directNetworkAtCutoff(
+  appUserId: string,
+  year: number,
+  month: number
+): EnrichedMember[] {
+  const cutoff = new Date(year, month - 1, 20, 23, 59, 59);
+  const ids = MOCK_REFERRALS
+    .filter(
+      (r) =>
+        r.referrerAppUserId === appUserId &&
+        r.status === 'active' &&
+        new Date(r.createdAt) <= cutoff
+    )
+    .map((r) => r.referredAppUserId);
+
+  return MOCK_MEMBERS.filter((m) => ids.includes(m.appUserId));
+}
+
+/**
+ * Las chances del sorteo general de cada mes cerrado del año.
+ * `throughMonth` es el último mes ya cerrado; el mes en curso se calcula
+ * aparte y se pasa como provisorio.
+ */
+export function buildMockMonthlyGeneralHistory(
+  appUserId: string,
+  year: number,
+  throughMonth: number
+): MonthlyChancesResult[] {
+  const owner = getMockMemberById(appUserId);
+  if (!owner) return [];
+
+  const history: MonthlyChancesResult[] = [];
+  for (let month = PROGRAM_START_MONTH; month <= throughMonth; month++) {
+    history.push(
+      calculateGeneralChances(owner, directNetworkAtCutoff(appUserId, year, month), month, year)
+    );
+  }
+  return history;
 }

@@ -24,12 +24,13 @@ export const MEMBER_CATEGORY_LABELS: Record<MemberCategory, string> = {
   cancha_protector: 'Socio Cancha Protector',
 };
 
-// Chances base por categoría
+// Chances base por categoría para el sorteo general del mes.
+// Regla del club: Socio Activo suma 1; cualquier otra categoría suma 2.
 export const BASE_CHANCES: Record<MemberCategory, number> = {
   activo: 1,
   activo_protector: 2,
   cancha: 2,
-  cancha_protector: 3,
+  cancha_protector: 2,
 };
 
 // ---- ESTADO DEL SOCIO ----

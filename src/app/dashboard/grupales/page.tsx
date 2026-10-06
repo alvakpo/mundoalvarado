@@ -18,9 +18,21 @@ import {
   toSecondLevelSummaries,
 } from '@/lib/business/privacy';
 import { getMonthName } from '@/lib/utils';
-import { Trophy, TrendingUp } from 'lucide-react';
+import { Award, TrendingUp } from 'lucide-react';
 
-export default function AnualPage() {
+// ============================================================
+// PREMIOS GRUPALES
+// ============================================================
+// Es el premio por ARMAR RED. Se calcula con la regla del programa:
+//   - 2 o más referidos directos al día  -> +1
+//   - cada referido directo que tenga 2 o más propios al día -> +1 más
+//
+// Es un pozo DISTINTO al de Sorteo anual. Ahí se acumulan las chances
+// del sorteo general (categoría + referidos); acá se premia la red.
+// Por eso los dos tienen su propia página y su propio acumulado.
+// ============================================================
+
+export default function GrupalesPage() {
   const { user } = useAuthStore();
 
   if (!user) return null;
@@ -110,17 +122,18 @@ export default function AnualPage() {
             width: 40,
             height: 40,
             borderRadius: '10px',
-            background: 'rgba(245, 158, 11, 0.15)',
+            background: 'rgba(168, 85, 247, 0.15)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-            <Trophy size={20} style={{ color: '#f59e0b' }} />
+            <Award size={20} style={{ color: '#a855f7' }} />
           </div>
-          <h1 className="page-title" style={{ fontSize: '1.75rem' }}>PREMIO ANUAL</h1>
+          <h1 className="page-title" style={{ fontSize: '1.75rem' }}>PREMIOS GRUPALES</h1>
         </div>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9375rem' }}>
-          Las chances se acumulan mes a mes hasta el sorteo de fin de año.
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9375rem', lineHeight: 1.6 }}>
+          Tu red también juega: cuantos más referidos activos sumes, más chances acumulás
+          para los premios grupales.
         </p>
       </div>
 
@@ -323,7 +336,11 @@ export default function AnualPage() {
         }}
       >
         <strong style={{ color: 'var(--text-secondary)' }}>Cómo funciona:</strong> Cada mes se evalúa tu red al día 20 a las 23:59.
-        Si tenés al menos 2 referidos directos al día: +1 chance. Por cada referido directo que tenga 2+ referidos propios al día: +1 chance extra. Estas chances se acumulan hasta el sorteo anual.
+        Si tenés al menos 2 referidos directos al día: +1 chance. Por cada referido directo que tenga 2+ referidos propios al día: +1 chance extra.
+        <div style={{ marginTop: '0.625rem' }}>
+          Es un pozo distinto al de <strong style={{ color: 'var(--text-secondary)' }}>Sorteo anual</strong>,
+          donde se acumulan las chances que generás por tu categoría y por tus referidos. Acá se premia armar red.
+        </div>
       </div>
     </div>
   );

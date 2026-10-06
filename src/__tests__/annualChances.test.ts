@@ -312,8 +312,8 @@ describe('Premio anual — I5: independiente del sorteo general', () => {
     const general = calculateGeneralChances(member, directos, 10, YEAR);
     const anual = calculateAnnualMonthlyChances(member, directos, new Map(), 10, YEAR);
 
-    // 3 base + 1 por Juan = 4 para el sorteo del mes
-    expect(general.totalChances).toBe(4);
+    // 2 base (Cancha Protector) + 1 por Juan = 3 para el sorteo del mes
+    expect(general.totalChances).toBe(3);
     // pero 0 para el pozo anual
     expect(anual.chancesThisMonth).toBe(0);
   });
@@ -330,9 +330,9 @@ describe('Premio anual — I5: independiente del sorteo general', () => {
     const anual = calculateAnnualMonthlyChances(member, directos, secondLevel, 10, YEAR);
     const pozo = calculateAnnualAccumulatedChances(USER, [], YEAR, anual);
 
-    // General: 3 base + 2 referidos = 5 (pozo distinto, se sortea ese mes)
-    expect(general.totalChances).toBe(5);
-    // Anual: +1 directos +1 por Juan = 2, y el pozo es 2, no 5 ni 7
+    // General: 2 base + 2 referidos = 4 (pozo distinto, se sortea ese mes)
+    expect(general.totalChances).toBe(4);
+    // Anual: +1 directos +1 por Juan = 2, y el pozo es 2, no 4 ni 7
     expect(anual.chancesThisMonth).toBe(2);
     expect(pozo.totalAccumulated).toBe(2);
   });

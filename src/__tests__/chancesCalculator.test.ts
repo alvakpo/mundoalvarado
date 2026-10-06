@@ -62,17 +62,18 @@ describe('calculateGeneralChances', () => {
     expect(result.totalChances).toBe(2);
   });
 
-  test('Socio Cancha Protector sin referidos = 3 chances', () => {
+  test('Socio Cancha Protector sin referidos = 2 chances', () => {
     const member = makeMember({ category: 'cancha_protector' });
     const result = calculateGeneralChances(member, [], MONTH, YEAR);
-    expect(result.totalChances).toBe(3);
+    // Regla del club: Activo = 1, cualquier otra categoría = 2
+    expect(result.totalChances).toBe(2);
   });
 
-  test('Socio Cancha Protector + 2 referidos activos = 5 chances', () => {
+  test('Socio Cancha Protector + 2 referidos activos = 4 chances', () => {
     const member = makeMember({ category: 'cancha_protector' });
     const refs = [makeReferral('r1'), makeReferral('r2')];
     const result = calculateGeneralChances(member, refs, MONTH, YEAR);
-    expect(result.totalChances).toBe(5); // 3 base + 2 referidos
+    expect(result.totalChances).toBe(4); // 2 base + 2 referidos
   });
 
   test('Socio con deuda = 0 chances', () => {
