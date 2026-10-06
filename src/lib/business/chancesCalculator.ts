@@ -6,6 +6,7 @@
 
 import {
   EnrichedMember,
+  MemberStatus,
   MonthlyChancesResult,
   AnnualMonthlyChancesResult,
   AnnualAccumulatedResult,
@@ -16,6 +17,16 @@ import {
   MONTHLY_CUTOFF_HOUR,
   MONTHLY_CUTOFF_MINUTE,
 } from '@/types';
+
+/**
+ * Lo ÚNICO que el cálculo del premio anual necesita saber del segundo
+ * nivel es si cada persona está al día o no.
+ *
+ * Está declarado así a propósito: el cálculo no puede mirar el apellido
+ * ni el teléfono de alguien que no es referido del socio. Si algún día
+ * alguien intenta usar otro campo acá, no compila.
+ */
+export type NetworkStatusEntry = { status: MemberStatus };
 
 // ============================================================
 // EVALUACIÓN DEL CORTE MENSUAL
@@ -135,7 +146,7 @@ export function calculateGeneralChances(
 export function calculateAnnualMonthlyChances(
   member: EnrichedMember,
   directReferrals: EnrichedMember[],
-  secondLevelMap: Map<string, EnrichedMember[]>,
+  secondLevelMap: Map<string, NetworkStatusEntry[]>,
   month: number,
   year: number
 ): AnnualMonthlyChancesResult {

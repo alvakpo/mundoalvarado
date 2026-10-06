@@ -16,16 +16,23 @@
 //   │   │
 //  Pedro Martín
 //
-// Cada columna es hermanos de un mismo padre, y el riel horizontal
+// Cada columna son hermanos de un mismo padre, y el riel horizontal
 // se corta a la mitad en los extremos: así el árbol no se puede
 // confundir con una jerarquía que no existe.
 //
-// El componente sólo se ocupa del DIBUJO. Qué significa cada badge y
-// quién es hijo de quién lo decide la pantalla que lo usa.
+// PRIVACIDAD: el primer y el segundo nivel NO usan el mismo nodo.
+//   - ReferralNode (nivel 1): ficha completa, con modal. Son personas
+//     que el socio invitó él mismo.
+//   - SecondLevelNode (nivel 2): sólo inicial, nombre de pila y estado,
+//     y no es clickeable. Son personas que no invitaste y no te conocen.
+// El tipo SecondLevelSummary no tiene apellido, foto, categoría,
+// número de socio, celular ni identificadores: no hay forma de que se
+// filtren por descuido, porque el dato no llega hasta acá.
 // ============================================================
 
 import type { ReactNode } from 'react';
 import { EnrichedMember } from '@/types';
+import { SecondLevelSummary } from '@/lib/business/privacy';
 import { MemberAvatar } from './MemberAvatar';
 import { ReferralNode } from './ReferralNode';
 
@@ -40,8 +47,8 @@ export interface ReferralTreeBadge {
 export interface ReferralTreeNode {
   member: EnrichedMember;
   badge?: ReferralTreeBadge;
-  /** Sólo para el mapa de 2 niveles. */
-  children?: ReferralTreeNode[];
+  /** Sólo para el mapa de 2 niveles, y ya reducido al mínimo público. */
+  children?: SecondLevelSummary[];
 }
 
 interface ReferralTreeProps {
@@ -106,6 +113,63 @@ function Badge({ badge }: { badge: ReferralTreeBadge }) {
   );
 }
 
+/**
+ * Nodo del SEGUNDO nivel: lo mínimo que se puede mostrar de alguien que
+ * no es tu referido. Sin apellido, sin foto, sin categoría, sin número
+ * de socio, sin celular — y sin modal, porque no hay nada más que abrir.
+ */
+function SecondLevelNode({
+  child,
+  animationDelay,
+}: {
+  child: SecondLevelSummary;
+  animationDelay: number;
+}) {
+  const isActive = child.status === 'al_dia';
+  return (
+    <div
+      className="animate-scale-in"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '0.25rem',
+        padding: '0.5rem',
+        animationDelay: `${animationDelay}ms`,
+        opacity: 0,
+        animationFillMode: 'forwards',
+      }}
+    >
+      {/* Sólo la inicial del nombre: con "PS" ya se filtraría el apellido */}
+      <div className="avatar" style={{ width: 36, height: 36, fontSize: '0.75rem' }}>
+        {child.firstName.charAt(0).toUpperCase()}
+      </div>
+      <div
+        style={{
+          fontSize: '0.75rem',
+          fontWeight: 600,
+          color: 'var(--text-primary)',
+          maxWidth: 58,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {child.firstName}
+      </div>
+      <div
+        style={{
+          fontSize: '0.6875rem',
+          whiteSpace: 'nowrap',
+          color: isActive ? 'var(--status-active)' : 'var(--status-inactive)',
+        }}
+      >
+        {isActive ? 'Al día' : 'Con deuda'}
+      </div>
+    </div>
+  );
+}
+
 export function ReferralTree({
   owner,
   ownerCaption,
@@ -162,7 +226,7 @@ export function ReferralTree({
                   <SiblingRail count={nodes.length} index={i} color={LINE_STRONG} height={14} />
                   <div style={{ width: 2, height: 12, background: LINE_STRONG }} />
 
-                  <ReferralNode member={node.member} level={1} animationDelay={i * 90} />
+                  <ReferralNode member={node.member} animationDelay={i * 90} />
                   {node.badge && <Badge badge={node.badge} />}
 
                   {/* Nivel 2: cuelga sólo de su padre */}
@@ -172,7 +236,7 @@ export function ReferralTree({
                       <div style={{ display: 'flex', alignItems: 'flex-start', width: '100%' }}>
                         {kids.map((kid, j) => (
                           <div
-                            key={kid.member.appUserId}
+                            key={`${kid.firstName}-${j}`}
                             style={{
                               flex: '1 1 0',
                               minWidth: 0,
@@ -183,9 +247,8 @@ export function ReferralTree({
                           >
                             <SiblingRail count={kids.length} index={j} color={LINE_SOFT} height={10} />
                             <div style={{ width: 2, height: 8, background: LINE_SOFT }} />
-                            <ReferralNode
-                              member={kid.member}
-                              level={2}
+                            <SecondLevelNode
+                              child={kid}
                               animationDelay={(i * kids.length + j) * 60 + 250}
                             />
                           </div>

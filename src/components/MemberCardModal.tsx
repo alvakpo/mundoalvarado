@@ -1,20 +1,28 @@
 'use client';
 
-import { useState } from 'react';
 import { EnrichedMember, MEMBER_CATEGORY_LABELS } from '@/types';
 import { MemberAvatar } from './MemberAvatar';
 import { MemberStatusBadge } from './MemberStatusBadge';
 import { X, Phone, Hash, Users } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface MemberCardModalProps {
   member: EnrichedMember;
   referralCount?: number;
   onClose: () => void;
-  isFirstLevel?: boolean;
 }
 
-export function MemberCardModal({ member, referralCount, onClose, isFirstLevel = true }: MemberCardModalProps) {
+/**
+ * Ficha de un REFERIDO DIRECTO.
+ *
+ * Este modal existe SÓLO para el primer nivel: son personas que el socio
+ * invitó él mismo, así que ve la ficha completa (incluido el celular).
+ *
+ * El segundo nivel no tiene modal a propósito. De esa gente sólo se
+ * conoce el nombre de pila y el estado, y ya están a la vista en el mapa:
+ * no hay nada más que abrir. Antes sí lo tenía, y filtraba apellido y
+ * número de socio.
+ */
+export function MemberCardModal({ member, referralCount, onClose }: MemberCardModalProps) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
@@ -65,7 +73,7 @@ export function MemberCardModal({ member, referralCount, onClose, isFirstLevel =
             </div>
           )}
 
-          {member.phone && isFirstLevel && (
+          {member.phone && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <div style={{ width: 36, height: 36, borderRadius: '8px', background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Phone size={16} style={{ color: 'var(--text-muted)' }} />

@@ -4,9 +4,11 @@
 -- ============================================================
 -- Ejecutar este script en el SQL Editor de Supabase
 --
--- Esta versión ya incluye el fix de seguridad RLS. Si tu base fue
--- inicializada con la versión anterior, aplicá en su lugar:
+-- Esta versión ya incluye el fix de seguridad RLS y la separación de
+-- acceso entre primer y segundo nivel de la red. Si tu base fue
+-- inicializada con una versión anterior, aplicá en su lugar, en orden:
 --   supabase/migrations/20261006000000_fix_rls_security.sql
+--   supabase/migrations/20261007000000_privacy_second_level.sql
 -- ============================================================
 
 -- ---- EXTENSIONES ----
@@ -244,45 +246,57 @@ REVOKE ALL ON FUNCTION public.resolve_referral_alias(TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.resolve_referral_alias(TEXT) TO anon, authenticated;
 
 -- ------------------------------------------------------------
--- IDs visibles para el usuario actual
+-- Segundo nivel de la red: LO MÍNIMO PÚBLICO
 -- ------------------------------------------------------------
--- Fuente única de verdad: yo + mis referidos directos activos +
--- el 2º nivel activo.
+-- Un socio ve la ficha COMPLETA de sus referidos directos, pero de los
+-- referidos de sus referidos sólo puede saber el nombre de pila y el
+-- estado. Esa persona no lo invitó y no lo conoce.
 --
--- Es SECURITY DEFINER a propósito: el RLS de `referrals` sólo deja
--- ver filas donde sos referrer o referred, así que una política que
--- hiciera el JOIN del 2º nivel directamente quedaba filtrada por ese
--- RLS y devolvía CERO filas (el 2º nivel nunca era visible).
+-- POR QUÉ ESTO ES UNA FUNCIÓN APARTE Y NO UNA POLÍTICA DE `members`:
+-- el RLS es a nivel de FILA, no de columna. Si el segundo nivel se
+-- resolviera con una política sobre `members`, el socio recibiría la
+-- fila COMPLETA — con apellido, número de socio y celular — y podría
+-- leerla con las herramientas del desarrollador aunque la pantalla no
+-- la dibujara. Ocultar en la pantalla no es privacidad.
+--
+-- Devuelve únicamente:
+--   parent_app_user_id  -> de qué referido directo cuelga (dato que el
+--                          socio ya tiene, porque es su referido)
+--   child_first_name    -> nombre de pila
+--   child_status        -> al día / con deuda
+-- No devuelve apellido, foto, categoría, número de socio, celular,
+-- email ni el identificador interno del socio.
+--
+-- SECURITY DEFINER para poder leer `referrals` sin que su propio RLS
+-- (que sólo deja ver filas propias) bloquee el join del 2º nivel.
 -- ------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.visible_member_ids()
-RETURNS SETOF UUID
+CREATE OR REPLACE FUNCTION public.my_second_level()
+RETURNS TABLE (
+  parent_app_user_id UUID,
+  child_first_name TEXT,
+  child_status public.member_status
+)
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
 SET search_path = ''
 AS $$
-  SELECT auth.uid()
-  WHERE auth.uid() IS NOT NULL
-
-  UNION
-
-  SELECT r.referred_app_user_id
-  FROM public.referrals r
-  WHERE r.referrer_app_user_id = auth.uid()
-    AND r.status = 'active'
-
-  UNION
-
-  SELECT r2.referred_app_user_id
+  SELECT
+    r1.referred_app_user_id,
+    m.first_name,
+    m.status
   FROM public.referrals r1
-  JOIN public.referrals r2 ON r2.referrer_app_user_id = r1.referred_app_user_id
+  JOIN public.referrals r2
+    ON r2.referrer_app_user_id = r1.referred_app_user_id
+  JOIN public.members m
+    ON m.app_user_id = r2.referred_app_user_id
   WHERE r1.referrer_app_user_id = auth.uid()
     AND r1.status = 'active'
     AND r2.status = 'active';
 $$;
 
-REVOKE ALL ON FUNCTION public.visible_member_ids() FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.visible_member_ids() TO authenticated;
+REVOKE ALL ON FUNCTION public.my_second_level() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.my_second_level() TO authenticated;
 
 -- ============================================================
 -- POLÍTICAS
@@ -305,10 +319,20 @@ CREATE POLICY "profiles_update_own"
   WITH CHECK (app_user_id = auth.uid());
 
 -- ---- members ----
--- Una sola política que sí hace visible el 2º nivel.
-CREATE POLICY "members_visible_in_own_network"
+-- Sólo uno mismo y los referidos DIRECTOS. El segundo nivel NO entra
+-- acá: se pide por my_second_level(), que devuelve nada más que el
+-- nombre de pila y el estado.
+CREATE POLICY "members_visible_self_and_direct"
   ON public.members FOR SELECT TO authenticated
-  USING (app_user_id IN (SELECT public.visible_member_ids()));
+  USING (
+    app_user_id = auth.uid()
+    OR app_user_id IN (
+      SELECT r.referred_app_user_id
+      FROM public.referrals r
+      WHERE r.referrer_app_user_id = auth.uid()
+        AND r.status = 'active'
+    )
+  );
 
 -- ---- referrals ----
 CREATE POLICY "referrals_select_as_referrer"
@@ -377,9 +401,14 @@ GRANT EXECUTE ON FUNCTION public.get_referral_network() TO authenticated;
 -- Con la anon key (sin sesión), esto debe dar 0 filas o error:
 --   SELECT * FROM public.profiles;
 --
--- Con un usuario autenticado, esto sólo debe devolver su propia red:
---   SELECT * FROM public.get_referral_network();
---   SELECT * FROM public.members;
+-- Con un usuario autenticado:
+--   SELECT * FROM public.get_referral_network();   -- ids de la red
+--   SELECT * FROM public.members;                  -- SÓLO yo + directos
+--   SELECT * FROM public.my_second_level();        -- 2º nivel: nombre y estado
+--
+-- Si `SELECT * FROM public.members` devuelve a alguien del segundo
+-- nivel, el RLS quedó mal aplicado: ahí estarían viajando apellido,
+-- número de socio y celular de gente que no es tu referido.
 --
 -- Y el resolutor público sólo debe devolver código + nombre:
 --   SELECT * FROM public.resolve_referral_alias('marce');

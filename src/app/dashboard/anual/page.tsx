@@ -13,6 +13,10 @@ import {
 } from '@/lib/business/chancesCalculator';
 import { ChanceBreakdown } from '@/components/ChanceBreakdown';
 import { ReferralTree, ReferralTreeNode } from '@/components/ReferralTree';
+import {
+  SecondLevelSummary,
+  toSecondLevelSummaries,
+} from '@/lib/business/privacy';
 import { getMonthName } from '@/lib/utils';
 import { Trophy, TrendingUp } from 'lucide-react';
 
@@ -31,12 +35,24 @@ export default function AnualPage() {
   const year = cutoff.effectiveYear;
 
   const directReferrals = getMockDirectReferrals(user.appUserId);
-  const secondLevelMap = getMockSecondLevelReferrals(user.appUserId);
+
+  // El segundo nivel se reduce a lo mínimo público ANTES de tocar la
+  // pantalla o el cálculo: nombre de pila y estado, nada más.
+  //
+  // Es el espejo en el cliente de la función my_second_level() de
+  // Supabase. Gracias a esto, el apellido, la foto, la categoría, el
+  // número de socio y el celular de alguien que no es tu referido no
+  // tienen por dónde llegar al navegador.
+  const rawSecondLevel = getMockSecondLevelReferrals(user.appUserId);
+  const secondLevelByParent = new Map<string, SecondLevelSummary[]>();
+  for (const [parentId, members] of rawSecondLevel) {
+    secondLevelByParent.set(parentId, toSecondLevelSummaries(members));
+  }
 
   const thisMonthResult = calculateAnnualMonthlyChances(
     user,
     directReferrals,
-    secondLevelMap,
+    secondLevelByParent,
     month,
     year
   );
@@ -61,7 +77,7 @@ export default function AnualPage() {
   // dejaba ver: con la fila plana, Juan y Laura se veían iguales aunque
   // sólo Juan aporta una chance.
   const treeNodes: ReferralTreeNode[] = directReferrals.map((ref) => {
-    const secondLevel = secondLevelMap.get(ref.appUserId) ?? [];
+    const secondLevel = secondLevelByParent.get(ref.appUserId) ?? [];
     const activeSecondLevel = secondLevel.filter((r) => r.status === 'al_dia').length;
 
     let badge: ReferralTreeNode['badge'];
@@ -80,7 +96,7 @@ export default function AnualPage() {
     return {
       member: ref,
       badge,
-      children: secondLevel.map((child) => ({ member: child })),
+      children: secondLevel,
     };
   });
 
@@ -278,6 +294,19 @@ export default function AnualPage() {
             </a>
           }
         />
+
+        <div style={{
+          marginTop: '1.5rem',
+          paddingTop: '1rem',
+          borderTop: '1px solid var(--border-subtle)',
+          fontSize: '0.75rem',
+          color: 'var(--text-muted)',
+          lineHeight: 1.6,
+        }}>
+          🔒 De tu red indirecta sólo se muestra el nombre de pila y el estado. Son socios que
+          no invitaste vos, así que su apellido, su número de socio y su contacto quedan
+          reservados.
+        </div>
       </div>
 
       {/* Explicación */}

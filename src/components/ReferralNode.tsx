@@ -4,16 +4,21 @@ import { useState } from 'react';
 import { EnrichedMember } from '@/types';
 import { MemberAvatar } from './MemberAvatar';
 import { MemberCardModal } from './MemberCardModal';
-import { cn } from '@/lib/utils';
 
 interface ReferralNodeProps {
   member: EnrichedMember;
-  isActive?: boolean;
-  level?: 1 | 2;
   animationDelay?: number;
 }
 
-export function ReferralNode({ member, level = 1, animationDelay = 0 }: ReferralNodeProps) {
+/**
+ * Nodo de un REFERIDO DIRECTO, con su modal de ficha completa.
+ *
+ * El segundo nivel NO usa este componente: lo dibuja SecondLevelNode
+ * dentro de ReferralTree, que sólo conoce nombre de pila y estado.
+ * Antes este mismo nodo servía para los dos niveles y era la vía por la
+ * que se filtraban el apellido y el número de socio.
+ */
+export function ReferralNode({ member, animationDelay = 0 }: ReferralNodeProps) {
   const [showModal, setShowModal] = useState(false);
   const isActive = member.status === 'al_dia';
 
@@ -46,17 +51,13 @@ export function ReferralNode({ member, level = 1, animationDelay = 0 }: Referral
           e.currentTarget.style.transform = 'scale(1)';
         }}
       >
-        <MemberAvatar
-          member={member}
-          size={level === 1 ? 'md' : 'sm'}
-          showStatus
-        />
+        <MemberAvatar member={member} size="md" showStatus />
         <div style={{ textAlign: 'center' }}>
           <div style={{
-            fontSize: level === 1 ? '0.8125rem' : '0.75rem',
+            fontSize: '0.8125rem',
             fontWeight: 600,
             color: 'var(--text-primary)',
-            maxWidth: level === 1 ? 80 : 58,
+            maxWidth: 80,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -80,7 +81,6 @@ export function ReferralNode({ member, level = 1, animationDelay = 0 }: Referral
         <MemberCardModal
           member={member}
           onClose={() => setShowModal(false)}
-          isFirstLevel={level === 1}
         />
       )}
     </>

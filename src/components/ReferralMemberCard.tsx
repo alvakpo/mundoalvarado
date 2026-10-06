@@ -83,7 +83,6 @@ export function ReferralMemberCard({
           member={member}
           referralCount={referralCount}
           onClose={() => setShowModal(false)}
-          isFirstLevel
         />
       )}
     </>
