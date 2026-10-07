@@ -23,10 +23,10 @@ import { MEMBER_CATEGORY_LABELS } from '@/types';
 
 const navItems = [
   { href: '/dashboard', label: 'Inicio', icon: Home },
-  { href: '/dashboard/chances', label: 'Chances mensuales', icon: Ticket },
-  { href: '/dashboard/sorteo-anual', label: 'Sorteo anual', icon: Trophy },
-  { href: '/dashboard/referidos', label: 'Mis referidos', icon: Users },
+  { href: '/dashboard/sorteo-mensual', label: 'Sorteo Mensual', icon: Ticket },
+  { href: '/dashboard/sorteo-anual', label: 'Sorteo Anual', icon: Trophy },
   { href: '/dashboard/niveles', label: 'Niveles', icon: TrendingUp },
+  { href: '/dashboard/referidos', label: 'Mis referidos', icon: Users },
   { href: '/dashboard/invitar', label: 'Invitar un amigo', icon: LinkIcon },
   { href: '/dashboard/puntos', label: 'Puntos diarios', icon: Gift },
   { href: '/dashboard/cuenta', label: 'Mi cuenta', icon: User },

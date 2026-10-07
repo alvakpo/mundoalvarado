@@ -479,6 +479,55 @@ body {
 .stagger-5 { animation-delay: 0.25s; }
 .stagger-6 { animation-delay: 0.3s; }
 
+/* ============================================================
+   ESCALERA DE NIVELES
+   ============================================================
+   Cada escalón es una fila: etiqueta | barra | detalle.
+   La barra crece con el nivel, así que la escalera se ve subir.
+   En celular el detalle baja debajo de la barra.
+   ============================================================ */
+.level-step {
+  display: grid;
+  grid-template-columns: 78px 1fr 190px;
+  align-items: center;
+  gap: 1rem;
+}
+
+.level-step-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 54px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.level-step-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+@media (max-width: 760px) {
+  .level-step {
+    grid-template-columns: 60px 1fr;
+    gap: 0.5rem 0.625rem;
+  }
+
+  .level-step-meta {
+    grid-column: 2;
+    flex-direction: row;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .level-step-bar {
+    height: 42px;
+  }
+}
+
 /* Skeleton loader */
 .skeleton {
   background: linear-gradient(

@@ -91,7 +91,7 @@ export interface ReferralWithMember extends Referral {
   referredMemberReferralCount?: number;
 }
 
-// ---- CHANCES MENSUALES ----
+// ---- SORTEO MENSUAL (chances del premio general) ----
 export interface ChanceBreakdownItem {
   label: string;
   chances: number;

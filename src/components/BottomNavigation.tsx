@@ -8,13 +8,13 @@ import { canClaimToday, clubDateKey } from '@/lib/business/dailyPoints';
 import { useIsHydrated } from '@/lib/useIsHydrated';
 
 // Siete ítems en el ancho de un celular. Los textos van cortos a
-// propósito: "Chances mensuales" no entra, "Mensual" sí.
+// propósito: "Sorteo mensual" no entra, "Mensual" sí.
 const navItems = [
   { href: '/dashboard', label: 'Inicio', icon: Home },
-  { href: '/dashboard/chances', label: 'Mensual', icon: Ticket },
-  { href: '/dashboard/sorteo-anual', label: 'Sorteo', icon: Trophy },
-  { href: '/dashboard/referidos', label: 'Referidos', icon: Users },
+  { href: '/dashboard/sorteo-mensual', label: 'Mensual', icon: Ticket },
+  { href: '/dashboard/sorteo-anual', label: 'Anual', icon: Trophy },
   { href: '/dashboard/niveles', label: 'Niveles', icon: TrendingUp },
+  { href: '/dashboard/referidos', label: 'Referidos', icon: Users },
   { href: '/dashboard/invitar', label: 'Invitar', icon: LinkIcon },
   { href: '/dashboard/puntos', label: 'Puntos', icon: Gift },
 ];

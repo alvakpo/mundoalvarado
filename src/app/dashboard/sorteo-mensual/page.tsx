@@ -57,9 +57,9 @@ export default function ChancesPage() {
           </div>
           <div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-              {getMonthName(month)} {year}
+              Premio general · {getMonthName(month)} {year}
             </div>
-            <h1 className="page-title" style={{ fontSize: '1.75rem' }}>PREMIO GENERAL</h1>
+            <h1 className="page-title" style={{ fontSize: '1.75rem' }}>SORTEO MENSUAL</h1>
           </div>
         </div>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9375rem' }}>

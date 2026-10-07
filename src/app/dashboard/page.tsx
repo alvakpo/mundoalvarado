@@ -99,7 +99,7 @@ export default function DashboardPage() {
           </p>
 
           <Link
-            href="/dashboard/chances"
+            href="/dashboard/sorteo-mensual"
             className="btn btn-primary"
             style={{
               background: 'rgba(255,255,255,0.15)',
@@ -156,8 +156,8 @@ export default function DashboardPage() {
           </div>
         </Link>
 
-        {/* Chances mensuales */}
-        <Link href="/dashboard/chances" style={{ textDecoration: 'none' }}>
+        {/* Sorteo mensual */}
+        <Link href="/dashboard/sorteo-mensual" style={{ textDecoration: 'none' }}>
           <div
             className="card card-interactive animate-fade-in stagger-3"
             style={{ height: '100%' }}
@@ -180,7 +180,7 @@ export default function DashboardPage() {
               Premio general
             </div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.125rem', fontWeight: 700, textTransform: 'uppercase' }}>
-              Chances mensuales
+              Sorteo mensual
             </div>
           </div>
         </Link>
