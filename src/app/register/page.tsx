@@ -103,7 +103,7 @@ function RegisterForm() {
         {/* Formulario */}
         <div
           className="card animate-fade-in stagger-1"
-          style={{ padding: '2rem', opacity: 0, animationFillMode: 'forwards' }}
+          style={{ padding: '2rem' }}
         >
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '1.5rem' }}>
             Crear cuenta

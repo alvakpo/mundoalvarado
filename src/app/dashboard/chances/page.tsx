@@ -1,15 +1,23 @@
 'use client';
 
+import { useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { getMockDirectReferrals } from '@/lib/mock/mockData';
 import { calculateGeneralChances } from '@/lib/business/chancesCalculator';
 import { ChanceBreakdown } from '@/components/ChanceBreakdown';
 import { ReferralTree, ReferralTreeNode } from '@/components/ReferralTree';
 import { getMonthName } from '@/lib/utils';
-import { Ticket } from 'lucide-react';
+import { Ticket, ChevronDown, ChevronRight } from 'lucide-react';
 
 export default function ChancesPage() {
   const { user } = useAuthStore();
+
+  // El desglose arranca CERRADO: al entrar, el socio ve su árbol y nada
+  // más. El detalle queda a un toque, para quien lo quiera mirar.
+  //
+  // El estado va antes del control de sesión porque los hooks no pueden
+  // ser condicionales.
+  const [verDesglose, setVerDesglose] = useState(false);
 
   if (!user) return null;
 
@@ -69,9 +77,7 @@ export default function ChancesPage() {
           marginBottom: '1.5rem',
           textAlign: 'center',
           border: '1px solid rgba(255,255,255,0.1)',
-          opacity: 0,
-          animationFillMode: 'forwards',
-        }}
+          }}
       >
         <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.75rem' }}>
           Total de chances
@@ -110,7 +116,7 @@ export default function ChancesPage() {
           queda abajo, disponible pero sin competir por la atención. */}
       <div
         className="animate-fade-in stagger-2"
-        style={{ opacity: 0, animationFillMode: 'forwards', marginBottom: '1.5rem' }}
+        style={{ marginBottom: '1.5rem' }}
       >
         <div style={{
           background: 'var(--bg-card)',
@@ -147,13 +153,54 @@ export default function ChancesPage() {
         </div>
       </div>
 
-      {/* Desglose */}
-      <div className="animate-fade-in stagger-3" style={{ opacity: 0, animationFillMode: 'forwards' }}>
-        <ChanceBreakdown
-          breakdown={chancesResult.breakdown}
-          total={chancesResult.totalChances}
-          title="Desglose de chances"
-        />
+      {/* Desglose: plegado por defecto */}
+      <div className="animate-fade-in stagger-3">
+        <button
+          onClick={() => setVerDesglose((v) => !v)}
+          aria-expanded={verDesglose}
+          className="card card-interactive"
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            cursor: 'pointer',
+            textAlign: 'left',
+            font: 'inherit',
+            color: 'inherit',
+          }}
+        >
+          {verDesglose
+            ? <ChevronDown size={18} style={{ color: 'var(--alvarado-accent)', flexShrink: 0 }} />
+            : <ChevronRight size={18} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />}
+          <span style={{
+            fontSize: '0.75rem',
+            color: 'var(--text-muted)',
+            fontWeight: 600,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+          }}>
+            Desglose de chances
+          </span>
+          <span style={{
+            marginLeft: 'auto',
+            fontFamily: 'var(--font-display)',
+            fontSize: '1.25rem',
+            fontWeight: 700,
+          }}>
+            {chancesResult.totalChances}
+          </span>
+        </button>
+
+        {verDesglose && (
+          <div style={{ marginTop: '0.75rem' }}>
+            <ChanceBreakdown
+              breakdown={chancesResult.breakdown}
+              total={chancesResult.totalChances}
+              title={`Cómo se arman tus ${chancesResult.totalChances} chances`}
+            />
+          </div>
+        )}
       </div>
 
       {/* Info adicional */}
@@ -168,9 +215,7 @@ export default function ChancesPage() {
           fontSize: '0.8125rem',
           color: 'var(--text-muted)',
           lineHeight: 1.6,
-          opacity: 0,
-          animationFillMode: 'forwards',
-        }}
+          }}
       >
         <strong style={{ color: 'var(--text-secondary)' }}>Corte mensual:</strong> Las chances se evalúan al día 20 de cada mes a las 23:59.
         La información posterior se considera para el mes siguiente.

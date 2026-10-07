@@ -55,9 +55,7 @@ export default function InvitarPage() {
           background: 'var(--gradient-primary)',
           borderRadius: '20px',
           border: '1px solid rgba(255,255,255,0.1)',
-          opacity: 0,
-          animationFillMode: 'forwards',
-        }}
+          }}
       >
         <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.75rem' }}>
           Tu código personal
@@ -80,7 +78,7 @@ export default function InvitarPage() {
       {/* Enlace */}
       <div
         className="card animate-fade-in stagger-2"
-        style={{ marginBottom: '1.5rem', opacity: 0, animationFillMode: 'forwards' }}
+        style={{ marginBottom: '1.5rem' }}
       >
         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.875rem' }}>
           Tu enlace personal
@@ -144,7 +142,7 @@ export default function InvitarPage() {
       {/* Cómo funciona */}
       <div
         className="card animate-fade-in stagger-3"
-        style={{ opacity: 0, animationFillMode: 'forwards' }}
+        style={{ opacity: 0 }}
       >
         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.25rem' }}>
           Cómo funciona

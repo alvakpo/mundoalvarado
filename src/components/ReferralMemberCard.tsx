@@ -32,9 +32,7 @@ export function ReferralMemberCard({
         className="card card-interactive animate-fade-in"
         style={{
           animationDelay: `${animationDelay}ms`,
-          opacity: 0,
-          animationFillMode: 'forwards',
-        }}
+          }}
         onClick={() => setShowModal(true)}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

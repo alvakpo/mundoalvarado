@@ -36,9 +36,7 @@ export function ReferralNode({ member, animationDelay = 0 }: ReferralNodeProps) 
           borderRadius: '12px',
           transition: 'all var(--transition-base)',
           animationDelay: `${animationDelay}ms`,
-          opacity: 0,
-          animationFillMode: 'forwards',
-        }}
+          }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = 'var(--bg-elevated)';
           e.currentTarget.style.transform = 'scale(1.05)';

@@ -41,19 +41,19 @@
   /* Fondos */
   --bg-primary: #080d17;
   --bg-secondary: #0f1621;
-  --bg-card: #141c2e;
-  --bg-card-hover: #1a2236;
-  --bg-elevated: #202a40;
+  --bg-card: #182036;
+  --bg-card-hover: #212b45;
+  --bg-elevated: #253053;
 
   /* Texto */
   --text-primary: #f0f4fa;
   --text-secondary: #a8b8d8;
-  --text-muted: #5a6a8e;
+  --text-muted: #7d8fb5;
   --text-accent: #3b6fd4;
 
   /* Bordes */
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-medium: rgba(255, 255, 255, 0.12);
+  --border-subtle: rgba(255, 255, 255, 0.12);
+  --border-medium: rgba(255, 255, 255, 0.18);
   --border-strong: rgba(59, 111, 212, 0.3);
 
   /* Gradientes */
@@ -461,15 +461,15 @@ body {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.4s ease forwards;
+  animation: fadeIn 0.4s ease both;
 }
 
 .animate-slide-in-left {
-  animation: slideInLeft 0.3s ease forwards;
+  animation: slideInLeft 0.3s ease both;
 }
 
 .animate-scale-in {
-  animation: scaleIn 0.3s ease forwards;
+  animation: scaleIn 0.3s ease both;
 }
 
 .stagger-1 { animation-delay: 0.05s; }

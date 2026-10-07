@@ -109,9 +109,7 @@ export default function SorteoAnualPage() {
           marginBottom: '1.5rem',
           textAlign: 'center',
           border: '1px solid rgba(255,255,255,0.1)',
-          opacity: 0,
-          animationFillMode: 'forwards',
-        }}
+          }}
       >
         <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.75rem' }}>
           Chances acumuladas {currentYear}
@@ -136,7 +134,7 @@ export default function SorteoAnualPage() {
       {/* Acumulado mes a mes: protagonista, todo el ancho */}
       <div
         className="card animate-fade-in stagger-2"
-        style={{ opacity: 0, animationFillMode: 'forwards' }}
+        style={{ opacity: 0 }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
           <TrendingUp size={15} style={{ color: 'var(--text-muted)' }} />

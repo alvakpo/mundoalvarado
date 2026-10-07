@@ -53,9 +53,7 @@ export default function CuentaPage() {
           padding: '2rem',
           marginBottom: '1.5rem',
           border: '1px solid rgba(255,255,255,0.1)',
-          opacity: 0,
-          animationFillMode: 'forwards',
-        }}
+          }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
           <MemberAvatar member={user} size="xl" showStatus />
@@ -76,7 +74,7 @@ export default function CuentaPage() {
       {/* Datos del socio */}
       <div
         className="card animate-fade-in stagger-2"
-        style={{ marginBottom: '1rem', opacity: 0, animationFillMode: 'forwards' }}
+        style={{ marginBottom: '1rem' }}
       >
         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.25rem' }}>
           Datos del socio
@@ -113,7 +111,7 @@ export default function CuentaPage() {
       {/* Datos del programa */}
       <div
         className="card animate-fade-in stagger-3"
-        style={{ opacity: 0, animationFillMode: 'forwards' }}
+        style={{ opacity: 0 }}
       >
         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.25rem' }}>
           Programa de beneficios

@@ -99,9 +99,7 @@ export default function PuntosPage() {
           marginBottom: '1.25rem',
           border: '1px solid rgba(255,255,255,0.1)',
           textAlign: 'center',
-          opacity: 0,
-          animationFillMode: 'forwards',
-        }}
+          }}
       >
         <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.5rem' }}>
           Tus puntos
@@ -143,7 +141,7 @@ export default function PuntosPage() {
       {/* Reclamo */}
       <div
         className="card animate-fade-in stagger-2"
-        style={{ marginBottom: '1.25rem', opacity: 0, animationFillMode: 'forwards' }}
+        style={{ marginBottom: '1.25rem' }}
       >
         {claimable ? (
           <>
@@ -249,7 +247,7 @@ export default function PuntosPage() {
       {/* Premios */}
       <div
         className="card animate-fade-in stagger-3"
-        style={{ marginBottom: '1.25rem', opacity: 0, animationFillMode: 'forwards' }}
+        style={{ marginBottom: '1.25rem' }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
           <Gift size={17} style={{ color: '#f59e0b' }} />
@@ -306,7 +304,7 @@ export default function PuntosPage() {
       {/* Cómo funciona */}
       <div
         className="card animate-fade-in stagger-4"
-        style={{ opacity: 0, animationFillMode: 'forwards' }}
+        style={{ opacity: 0 }}
       >
         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.25rem' }}>
           Cómo funciona

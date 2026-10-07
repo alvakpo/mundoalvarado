@@ -102,7 +102,7 @@ export default function LoginPage() {
         {/* Formulario */}
         <div
           className="card animate-fade-in stagger-1"
-          style={{ width: '100%', padding: '2rem', opacity: 0, animationFillMode: 'forwards' }}
+          style={{ width: '100%', padding: '2rem' }}
         >
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '1.75rem' }}>
             Iniciar sesión
@@ -208,9 +208,7 @@ export default function LoginPage() {
             borderRadius: '12px',
             border: '1px solid rgba(59, 111, 212, 0.2)',
             width: '100%',
-            opacity: 0,
-            animationFillMode: 'forwards',
-          }}
+            }}
         >
           <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
             🧪 <strong style={{ color: 'var(--text-secondary)' }}>Modo demo:</strong> Usá la cuenta de prueba

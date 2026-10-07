@@ -51,9 +51,7 @@ export default function DashboardPage() {
           border: '1px solid rgba(255,255,255,0.1)',
           position: 'relative',
           overflow: 'hidden',
-          opacity: 0,
-          animationFillMode: 'forwards',
-        }}
+          }}
       >
         {/* Decoración */}
         <div style={{
@@ -128,8 +126,6 @@ export default function DashboardPage() {
           <div
             className="card card-interactive animate-fade-in stagger-2"
             style={{
-              opacity: 0,
-              animationFillMode: 'forwards',
               height: '100%',
               border: '1px solid rgba(245, 158, 11, 0.3)',
             }}
@@ -164,7 +160,7 @@ export default function DashboardPage() {
         <Link href="/dashboard/chances" style={{ textDecoration: 'none' }}>
           <div
             className="card card-interactive animate-fade-in stagger-3"
-            style={{ opacity: 0, animationFillMode: 'forwards', height: '100%' }}
+            style={{ height: '100%' }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
               <div style={{
@@ -193,7 +189,7 @@ export default function DashboardPage() {
         <Link href="/dashboard/sorteo-anual" style={{ textDecoration: 'none' }}>
           <div
             className="card card-interactive animate-fade-in stagger-4"
-            style={{ opacity: 0, animationFillMode: 'forwards', height: '100%' }}
+            style={{ height: '100%' }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
               <div style={{
@@ -225,7 +221,7 @@ export default function DashboardPage() {
         <Link href="/dashboard/referidos" style={{ textDecoration: 'none' }}>
           <div
             className="card card-interactive animate-fade-in stagger-5"
-            style={{ opacity: 0, animationFillMode: 'forwards', height: '100%' }}
+            style={{ height: '100%' }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
               <div style={{
@@ -259,7 +255,7 @@ export default function DashboardPage() {
         <Link href="/dashboard/invitar" style={{ textDecoration: 'none' }}>
           <div
             className="card card-interactive animate-fade-in stagger-6"
-            style={{ opacity: 0, animationFillMode: 'forwards', height: '100%', background: 'var(--gradient-accent)', border: '1px solid var(--border-strong)' }}
+            style={{ height: '100%', background: 'var(--gradient-accent)', border: '1px solid var(--border-strong)' }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
               <div style={{

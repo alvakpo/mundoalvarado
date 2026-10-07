@@ -48,9 +48,7 @@ export default function ReferidosPage() {
             borderRadius: '14px',
             border: '1px solid var(--border-subtle)',
             textAlign: 'center',
-            opacity: 0,
-            animationFillMode: 'forwards',
-          }}
+            }}
         >
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
             {directReferrals.length}
@@ -69,9 +67,7 @@ export default function ReferidosPage() {
             borderRadius: '14px',
             border: '1px solid rgba(34, 197, 94, 0.2)',
             textAlign: 'center',
-            opacity: 0,
-            animationFillMode: 'forwards',
-          }}
+            }}
         >
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 700, color: 'var(--status-active)', lineHeight: 1 }}>
             {activeReferrals.length}
@@ -90,9 +86,7 @@ export default function ReferidosPage() {
             borderRadius: '14px',
             border: '1px solid var(--border-subtle)',
             textAlign: 'center',
-            opacity: 0,
-            animationFillMode: 'forwards',
-          }}
+            }}
         >
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 700, color: 'var(--alvarado-accent)', lineHeight: 1 }}>
             +{activeReferrals.length}
@@ -118,7 +112,7 @@ export default function ReferidosPage() {
       ) : (
         <div
           className="card animate-fade-in stagger-4"
-          style={{ textAlign: 'center', padding: '3rem', opacity: 0, animationFillMode: 'forwards' }}
+          style={{ textAlign: 'center', padding: '3rem' }}
         >
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👥</div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.75rem' }}>
