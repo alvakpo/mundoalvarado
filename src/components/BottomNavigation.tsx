@@ -7,12 +7,10 @@ import { useDailyPointsStore } from '@/store/dailyPointsStore';
 import { canClaimToday, clubDateKey } from '@/lib/business/dailyPoints';
 import { useIsHydrated } from '@/lib/useIsHydrated';
 
-// Siete ítems en el ancho de un celular. Los textos van cortos a
-// propósito: "Sorteo mensual" no entra, "Mensual" sí.
+// Ítems de la barra inferior móvil. 6 ítems entran cómodos en cualquier celular.
 const navItems = [
-  { href: '/dashboard', label: 'Inicio', icon: Home },
-  { href: '/dashboard/sorteo-mensual', label: 'Mensual', icon: Ticket },
-  { href: '/dashboard/sorteo-anual', label: 'Anual', icon: Trophy },
+  { href: '/dashboard', label: 'Inicio', icon: Home, matchExact: true },
+  { href: '/dashboard/sorteo-mensual', label: 'Sorteos', icon: Ticket, matchPrefix: ['/dashboard/sorteo-mensual', '/dashboard/sorteo-anual'] },
   { href: '/dashboard/niveles', label: 'Niveles', icon: TrendingUp },
   { href: '/dashboard/referidos', label: 'Referidos', icon: Users },
   { href: '/dashboard/invitar', label: 'Invitar', icon: LinkIcon },
@@ -39,8 +37,13 @@ export function BottomNavigation() {
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >
-      {navItems.map(({ href, label, icon: Icon }) => {
-        const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
+      {navItems.map((item) => {
+        const { href, label, icon: Icon } = item;
+        const isActive = item.matchPrefix
+          ? item.matchPrefix.some((prefix) => pathname.startsWith(prefix))
+          : item.matchExact
+            ? pathname === href
+            : pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
         const destacar = href === '/dashboard/puntos' && puntosParaReclamar;
 
         return (

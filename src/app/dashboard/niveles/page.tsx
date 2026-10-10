@@ -67,28 +67,28 @@ export default function NivelesPage() {
       </div>
 
       {/* ============================================================
-          LA ESCALERA — protagonista, a todo el ancho
+          LA ESCALERA — protagonista, integrada al fondo
           ============================================================ */}
-      <div
-        className="card animate-fade-in stagger-1"
-        style={{ padding: '2.25rem 2.5rem 2.5rem', marginBottom: '1.5rem' }}
-      >
-        {/* Tu nivel, en grande */}
+      <div className="animate-fade-in stagger-1" style={{ marginBottom: '2.5rem' }}>
+        {/* Tu nivel, en grande integrado al lienzo */}
         <div style={{
           display: 'flex',
           alignItems: 'flex-end',
+          justifyContent: 'space-between',
           gap: '1.5rem',
           flexWrap: 'wrap',
-          paddingBottom: '1.75rem',
+          paddingBottom: '2rem',
           marginBottom: '2rem',
-          borderBottom: '1px solid var(--border-subtle)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          position: 'relative',
         }}>
           <div>
             <div style={{
               fontSize: '0.6875rem',
               color: 'var(--text-muted)',
               textTransform: 'uppercase',
-              letterSpacing: '0.14em',
+              letterSpacing: '0.16em',
+              fontWeight: 600,
               marginBottom: '0.5rem',
             }}>
               Estás en
@@ -96,65 +96,85 @@ export default function NivelesPage() {
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '1.25rem', flexWrap: 'wrap' }}>
               <span style={{
                 fontFamily: 'var(--font-display)',
-                fontSize: '5rem',
-                fontWeight: 700,
+                fontSize: '5.5rem',
+                fontWeight: 800,
                 lineHeight: 0.85,
                 color: 'var(--alvarado-accent)',
+                textShadow: '0 0 35px rgba(59, 111, 212, 0.4)',
               }}>
                 {progress.currentLevel}
               </span>
               <span style={{
                 fontFamily: 'var(--font-display)',
-                fontSize: '2.25rem',
+                fontSize: '2.5rem',
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 lineHeight: 1,
+                letterSpacing: '0.04em',
+                color: 'var(--text-primary)',
               }}>
                 {progress.currentTitle}
               </span>
               {progress.currentLevel > 0 && (
-                <span style={{ display: 'flex', gap: '0.25rem' }}>
+                <span style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
                   {Array.from({ length: progress.currentLevel }).map((_, i) => (
-                    <Star key={i} size={24} fill="#fbbf24" style={{ color: '#fbbf24' }} />
+                    <Star
+                      key={i}
+                      size={24}
+                      fill="#fbbf24"
+                      style={{ color: '#fbbf24', filter: 'drop-shadow(0 0 6px rgba(251, 191, 36, 0.45))' }}
+                    />
                   ))}
                 </span>
               )}
             </div>
           </div>
 
-          {/* Los números del costado */}
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: '2.5rem' }}>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.25rem', fontWeight: 700, lineHeight: 1 }}>
+          {/* Los números del costado: cápsulas sutiles */}
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '14px',
+              padding: '0.875rem 1.25rem',
+              minWidth: 110,
+              textAlign: 'center',
+            }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 700, lineHeight: 1 }}>
                 {directReferrals.length}
               </div>
-              <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '0.25rem' }}>
+              <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '0.35rem' }}>
                 Referidos
               </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.25rem', fontWeight: 700, lineHeight: 1, color: 'var(--status-active)' }}>
+            <div style={{
+              background: 'rgba(34, 197, 94, 0.06)',
+              border: '1px solid rgba(34, 197, 94, 0.25)',
+              borderRadius: '14px',
+              padding: '0.875rem 1.25rem',
+              minWidth: 110,
+              textAlign: 'center',
+            }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 700, lineHeight: 1, color: 'var(--status-active)' }}>
                 {activeReferrals}
               </div>
-              <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '0.25rem' }}>
+              <div style={{ fontSize: '0.6875rem', color: 'rgba(34, 197, 94, 0.8)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '0.35rem' }}>
                 Al día
               </div>
             </div>
           </div>
         </div>
 
-        {/* Los escalones */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+        {/* Los escalones flotando en el lienzo */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {escalones.map((def) => {
             const alcanzado = def.level <= progress.currentLevel;
             const esActual = def.level === progress.currentLevel;
             const opacity = stepOpacity(def.level, progress.currentLevel);
-            // La barra crece con el nivel: así se ve la escalera subir.
-            const ancho = 20 + (def.level / MAX_LEVEL) * 58;
+            const ancho = 20 + (def.level / MAX_LEVEL) * 60;
 
             return (
               <div key={def.level} className="level-step" style={{ opacity }}>
-
                 <div style={{
                   fontSize: '0.75rem',
                   fontWeight: esActual || alcanzado ? 700 : 500,
@@ -173,15 +193,19 @@ export default function NivelesPage() {
                   style={{
                     width: `${ancho}%`,
                     background: esActual
-                      ? 'var(--gradient-accent)'
+                      ? 'linear-gradient(90deg, #1e3a6e 0%, #3b6fd4 50%, #4d82eb 100%)'
                       : alcanzado
-                        ? 'rgba(34, 197, 94, 0.22)'
-                        : 'var(--bg-elevated)',
+                        ? 'rgba(34, 197, 94, 0.16)'
+                        : 'rgba(255, 255, 255, 0.03)',
                     border: esActual
-                      ? '1px solid var(--alvarado-accent)'
+                      ? '1px solid rgba(59, 111, 212, 0.8)'
                       : alcanzado
-                        ? '1px solid rgba(34, 197, 94, 0.35)'
-                        : '1px solid var(--border-subtle)',
+                        ? '1px solid rgba(34, 197, 94, 0.3)'
+                        : '1px solid rgba(255, 255, 255, 0.06)',
+                    boxShadow: esActual
+                      ? '0 0 24px rgba(59, 111, 212, 0.35), inset 0 1px 1px rgba(255,255,255,0.3)'
+                      : 'none',
+                    transition: 'all var(--transition-base)',
                   }}
                 >
                   {def.level === 0 ? (
@@ -190,14 +214,15 @@ export default function NivelesPage() {
                     Array.from({ length: def.level }).map((_, i) => (
                       <Star
                         key={i}
-                        size={15}
+                        size={16}
                         fill={alcanzado ? (esActual ? '#ffffff' : '#fbbf24') : 'transparent'}
                         style={{
                           color: esActual
                             ? '#ffffff'
                             : alcanzado
                               ? '#fbbf24'
-                              : 'var(--text-muted)',
+                              : 'rgba(255, 255, 255, 0.2)',
+                          filter: esActual ? 'drop-shadow(0 0 4px rgba(255, 255, 255, 0.6))' : undefined,
                         }}
                       />
                     ))
@@ -214,7 +239,12 @@ export default function NivelesPage() {
                   }}>
                     {def.level === 0 ? 'ninguno' : levelRangeLabel(def.level)}
                   </div>
-                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                  <div style={{
+                    fontSize: '0.8125rem',
+                    color: esActual ? 'var(--alvarado-accent)' : 'var(--text-muted)',
+                    fontWeight: esActual ? 600 : 400,
+                    whiteSpace: 'nowrap',
+                  }}>
                     {esActual ? '← estás acá' : def.title}
                   </div>
                 </div>
@@ -225,16 +255,24 @@ export default function NivelesPage() {
       </div>
 
       {/* ============================================================
-          Lo secundario: más chico y abajo
+          Lo secundario: cápsulas estilizadas
           ============================================================ */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
         gap: '1.5rem',
       }}>
-
         {/* Cuánto falta */}
-        <div className="card animate-fade-in stagger-2">
+        <div
+          className="animate-fade-in stagger-2"
+          style={{
+            background: 'rgba(19, 27, 46, 0.6)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: '16px',
+            padding: '1.5rem',
+          }}
+        >
           {progress.nextLevel === null ? (
             <>
               <div style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>🏆</div>
@@ -258,7 +296,7 @@ export default function NivelesPage() {
                 </div>
               </div>
 
-              <div style={{ height: 8, borderRadius: '100px', background: 'var(--bg-elevated)', overflow: 'hidden' }}>
+              <div style={{ height: 8, borderRadius: '100px', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
                 <div style={{
                   width: `${Math.round(progress.progressInLevel * 100)}%`,
                   height: '100%',
@@ -275,7 +313,16 @@ export default function NivelesPage() {
         </div>
 
         {/* Cómo funciona */}
-        <div className="card animate-fade-in stagger-3">
+        <div
+          className="animate-fade-in stagger-3"
+          style={{
+            background: 'rgba(19, 27, 46, 0.6)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: '16px',
+            padding: '1.5rem',
+          }}
+        >
           <div style={{
             fontSize: '0.75rem',
             color: 'var(--text-muted)',

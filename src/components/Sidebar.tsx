@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
@@ -13,6 +14,7 @@ import {
   Gift,
   User,
   LogOut,
+  ChevronDown,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useDailyPointsStore } from '@/store/dailyPointsStore';
@@ -21,21 +23,14 @@ import { useIsHydrated } from '@/lib/useIsHydrated';
 import { MemberAvatar } from './MemberAvatar';
 import { MEMBER_CATEGORY_LABELS } from '@/types';
 
-const navItems = [
-  { href: '/dashboard', label: 'Inicio', icon: Home },
-  { href: '/dashboard/sorteo-mensual', label: 'Sorteo Mensual', icon: Ticket },
-  { href: '/dashboard/sorteo-anual', label: 'Sorteo Anual', icon: Trophy },
-  { href: '/dashboard/niveles', label: 'Niveles', icon: TrendingUp },
-  { href: '/dashboard/referidos', label: 'Mis referidos', icon: Users },
-  { href: '/dashboard/invitar', label: 'Invitar un amigo', icon: LinkIcon },
-  { href: '/dashboard/puntos', label: 'Puntos diarios', icon: Gift },
-  { href: '/dashboard/cuenta', label: 'Mi cuenta', icon: User },
-];
 
 export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
   const { lastClaimDate } = useDailyPointsStore();
+
+  const isSorteosActive = pathname.startsWith('/dashboard/sorteo-mensual') || pathname.startsWith('/dashboard/sorteo-anual');
+  const [sorteosOpen, setSorteosOpen] = useState(true);
 
   // El servidor no puede saber si el socio ya reclamó (vive en el
   // navegador), así que el indicador se dibuja recién tras hidratar.
@@ -97,11 +92,128 @@ export function Sidebar() {
 
       {/* Navegación */}
       <nav style={{ flex: 1, padding: '0.75rem 0.75rem', overflowY: 'auto' }}>
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
+        {/* Inicio */}
+        <Link
+          href="/dashboard"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+            padding: '0.75rem 0.875rem',
+            borderRadius: '10px',
+            marginBottom: '2px',
+            textDecoration: 'none',
+            color: pathname === '/dashboard' ? 'var(--text-primary)' : 'var(--text-muted)',
+            background: pathname === '/dashboard' ? 'var(--bg-elevated)' : 'transparent',
+            borderLeft: pathname === '/dashboard' ? '2px solid var(--alvarado-accent)' : '2px solid transparent',
+            transition: 'all var(--transition-fast)',
+            fontSize: '0.875rem',
+            fontWeight: pathname === '/dashboard' ? 600 : 400,
+          }}
+        >
+          <Home size={18} style={{ flexShrink: 0 }} />
+          Inicio
+        </Link>
 
-          // Puntos diarios: se prende cuando hay puntos para reclamar y
-          // se apaga cuando ya reclamó.
+        {/* Desplegable Sorteos */}
+        <div style={{ marginBottom: '2px' }}>
+          <button
+            type="button"
+            onClick={() => setSorteosOpen((v) => !v)}
+            aria-expanded={sorteosOpen}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.75rem 0.875rem',
+              borderRadius: '10px',
+              border: 'none',
+              background: isSorteosActive ? 'rgba(59, 111, 212, 0.12)' : 'transparent',
+              color: isSorteosActive ? 'var(--text-primary)' : 'var(--text-muted)',
+              borderLeft: isSorteosActive ? '2px solid var(--alvarado-accent)' : '2px solid transparent',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              fontWeight: isSorteosActive ? 600 : 400,
+              textAlign: 'left',
+              fontFamily: 'inherit',
+              transition: 'all var(--transition-fast)',
+            }}
+          >
+            <Ticket size={18} style={{ flexShrink: 0, color: isSorteosActive ? 'var(--alvarado-accent)' : undefined }} />
+            <span style={{ flex: 1 }}>Sorteos</span>
+            <ChevronDown
+              size={16}
+              style={{
+                transform: sorteosOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
+                transition: 'transform var(--transition-fast)',
+                color: 'var(--text-muted)',
+              }}
+            />
+          </button>
+
+          {/* Subitems Sorteo Mensual y Anual */}
+          {sorteosOpen && (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              paddingLeft: '1.25rem',
+              marginTop: '2px',
+              gap: '2px',
+              borderLeft: '1px dashed var(--border-subtle)',
+              marginLeft: '1.25rem',
+            }}>
+              <Link
+                href="/dashboard/sorteo-mensual"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.625rem',
+                  padding: '0.625rem 0.75rem',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  fontSize: '0.8125rem',
+                  color: pathname === '/dashboard/sorteo-mensual' ? 'var(--text-primary)' : 'var(--text-muted)',
+                  background: pathname === '/dashboard/sorteo-mensual' ? 'var(--bg-elevated)' : 'transparent',
+                  fontWeight: pathname === '/dashboard/sorteo-mensual' ? 600 : 400,
+                  transition: 'all var(--transition-fast)',
+                }}
+              >
+                <Ticket size={14} style={{ color: pathname === '/dashboard/sorteo-mensual' ? 'var(--alvarado-accent)' : 'var(--text-muted)' }} />
+                Sorteo Mensual
+              </Link>
+              <Link
+                href="/dashboard/sorteo-anual"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.625rem',
+                  padding: '0.625rem 0.75rem',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  fontSize: '0.8125rem',
+                  color: pathname === '/dashboard/sorteo-anual' ? 'var(--text-primary)' : 'var(--text-muted)',
+                  background: pathname === '/dashboard/sorteo-anual' ? 'var(--bg-elevated)' : 'transparent',
+                  fontWeight: pathname === '/dashboard/sorteo-anual' ? 600 : 400,
+                  transition: 'all var(--transition-fast)',
+                }}
+              >
+                <Trophy size={14} style={{ color: pathname === '/dashboard/sorteo-anual' ? 'var(--alvarado-accent)' : 'var(--text-muted)' }} />
+                Sorteo Anual
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Resto de ítems */}
+        {[
+          { href: '/dashboard/niveles', label: 'Niveles', icon: TrendingUp },
+          { href: '/dashboard/referidos', label: 'Mis referidos', icon: Users },
+          { href: '/dashboard/invitar', label: 'Invitar un amigo', icon: LinkIcon },
+          { href: '/dashboard/puntos', label: 'Puntos diarios', icon: Gift },
+          { href: '/dashboard/cuenta', label: 'Mi cuenta', icon: User },
+        ].map(({ href, label, icon: Icon }) => {
+          const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
           const destacar = href === '/dashboard/puntos' && puntosParaReclamar;
 
           return (
