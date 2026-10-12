@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/authStore';
 import { MemberStatusBadge } from '@/components/MemberStatusBadge';
 import { MEMBER_CATEGORY_LABELS } from '@/types';
 import { getMockDirectReferrals } from '@/lib/mock/mockData';
-import { Trophy, Users, Link as LinkIcon, ChevronRight, Ticket, Star, Gift } from 'lucide-react';
+import { Trophy, Users, Link as LinkIcon, ChevronRight, Ticket, Star, Gift, Gamepad2 } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
@@ -152,6 +152,41 @@ export default function DashboardPage() {
             </div>
             <div style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', marginTop: '0.5rem' }}>
               Reclamá tus 100 puntos de hoy
+            </div>
+          </div>
+        </Link>
+
+        {/* Juegos */}
+        <Link href="/dashboard/juegos" style={{ textDecoration: 'none' }}>
+          <div
+            className="card card-interactive animate-fade-in stagger-2"
+            style={{
+              height: '100%',
+              border: '1px solid rgba(59, 111, 212, 0.3)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <div style={{
+                width: 44,
+                height: 44,
+                borderRadius: '12px',
+                background: 'rgba(59, 111, 212, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <Gamepad2 size={22} style={{ color: 'var(--alvarado-accent)' }} />
+              </div>
+              <ChevronRight size={18} style={{ color: 'var(--text-muted)' }} />
+            </div>
+            <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Entretenimiento
+            </div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.125rem', fontWeight: 700, textTransform: 'uppercase' }}>
+              Juegos
+            </div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', marginTop: '0.5rem' }}>
+              Torino en Avioneta — ¡Jugá ya!
             </div>
           </div>
         </Link>

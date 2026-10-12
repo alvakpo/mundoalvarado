@@ -2,18 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Ticket, Trophy, Users, TrendingUp, Link as LinkIcon, Gift } from 'lucide-react';
+import { Home, Ticket, Trophy, Users, TrendingUp, Link as LinkIcon, Gift, Gamepad2 } from 'lucide-react';
 import { useDailyPointsStore } from '@/store/dailyPointsStore';
 import { canClaimToday, clubDateKey } from '@/lib/business/dailyPoints';
 import { useIsHydrated } from '@/lib/useIsHydrated';
 
-// Ítems de la barra inferior móvil. 6 ítems entran cómodos en cualquier celular.
+// Ítems de la barra inferior móvil.
 const navItems = [
   { href: '/dashboard', label: 'Inicio', icon: Home, matchExact: true },
   { href: '/dashboard/sorteo-mensual', label: 'Sorteos', icon: Ticket, matchPrefix: ['/dashboard/sorteo-mensual', '/dashboard/sorteo-anual'] },
   { href: '/dashboard/niveles', label: 'Niveles', icon: TrendingUp },
   { href: '/dashboard/referidos', label: 'Referidos', icon: Users },
-  { href: '/dashboard/invitar', label: 'Invitar', icon: LinkIcon },
+  { href: '/dashboard/juegos', label: 'Juegos', icon: Gamepad2 },
   { href: '/dashboard/puntos', label: 'Puntos', icon: Gift },
 ];
 

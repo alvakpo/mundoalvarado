@@ -15,6 +15,7 @@ import {
   User,
   LogOut,
   ChevronDown,
+  Gamepad2,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useDailyPointsStore } from '@/store/dailyPointsStore';
@@ -211,6 +212,7 @@ export function Sidebar() {
           { href: '/dashboard/referidos', label: 'Mis referidos', icon: Users },
           { href: '/dashboard/invitar', label: 'Invitar un amigo', icon: LinkIcon },
           { href: '/dashboard/puntos', label: 'Puntos diarios', icon: Gift },
+          { href: '/dashboard/juegos', label: 'Juegos', icon: Gamepad2 },
           { href: '/dashboard/cuenta', label: 'Mi cuenta', icon: User },
         ].map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
